@@ -6,7 +6,8 @@ using namespace std;
 class ChessMoves
 {
 	private:
-		bool kingInCheck;
+		bool kingInCheck; //Checks if king is in check
+		bool blockingCheck; //Checks if king will be in check if this piece is moved
 	public:
 		//checkKingMoves(Chess);
 		//checkRookMoves(Chess);
@@ -23,22 +24,22 @@ class ChessMoves
 
 
 
-	list<string> ChessMoves::StartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few latters)
+	list<string> ChessMoves::StartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few letters)
 	{
 		list<string> moves; //White Starting Moves
 		//Pawn Moves
 		for(int k = 1; k <= 8; k++){
-			string file = "abcdefgh"[k-1];
-			moves.push_back(k + "3");
-			moves.push_back(k + "4");
+			string file = to_string("abcdefgh"[k-1]);
+			moves.push_back(file + "3");
+			moves.push_back(file + "4");
 		}
 		//Knight Moves
 		for(int k = 1; k <= 2; k++){
 			int startingFile = k/2*5 + 1;//gets file to be either 1 or 6 (B or G)
-			int startingRow = 1;
+			int startingRank = 1;
 			for(int x = -1; x <= 1; x+= 2){
-				string newFile = "abcdefghijk"[startingFile + x];
-				moves.push_back(k + "3");
+				string newFile = to_string("abcdefghijk"[startingFile + x]);
+				moves.push_back(newFile + to_string(startingRank + 2));
 			}
 		}
 		return moves;
@@ -49,7 +50,7 @@ class ChessMoves
 	{
 		if (piece.GetType() == "King") {
 			//checkKingMoves(piece);
-			if() //Make sure king isn't in check after move
+			//if() //Make sure king isn't in check after move
 		}
 		else if (piece.GetType() == "Queen") {
 			//checkQueenMoves(piece);
@@ -71,39 +72,37 @@ class ChessMoves
 
 
 	static void ChessMoves::Move(Chess piece, string newPosition) {
-		int newFile = ChangeLetterToNumber(newPosition.substr(0, 1));
-		int newFile = int(newPosition.substr(1, 1));
+		//Make a check to make sure !blockingChess is true before the move can be made
 
-		//Make a check for legal move depending on piece and making sure they don't create a check on their own king by doing so
+		int newRank = ChangeLetterToNumber(newPosition.substr(0, 1));
+		string newFile = newPosition.substr(1, 1);
+		string newPosition = newFile + to_string(newRank);
 
-		file = newFile;
-		rank = newRank;
+
+		piece.SetPosition(newPosition);
 	}
 
 	bool ChessMoves::IsInCheck(Chess King)//See if king is in check
 	{
 		string colorOfKing = King.GetColor();
 		if (colorOfKing == "White") {
-			if()
+			//if()
 		}
 	}
 
 	list<string> ChessMoves::checkKingMoves(Chess piece)
 	{
 		int currentFile = piece.GetFile();
-		int currentRow = piece.GetRow();
+		int currentRow = piece.GetRank();
 
-		std::list<string> possibleMoves();
+		list<string> possibleMoves();
 		
 		
 	}
 
 	list<string> ChessMoves::checkQueenMoves(Chess piece)
 	{
-		if (piece.GetType() != "Queen") {
-			cout << "Your piece is not a Queen, like the computer thought it was, the piece is a " << piece.GetType() << ".";
-			break;
-		}
+		
 		std::list<string> possibleMoves();
 		
 		
@@ -163,4 +162,6 @@ class ChessMoves
 	static int ChessMoves::ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 		string str = "abcdefgh";
 		return str.find_first_of(letter) + 1;
+	}
+
 };
