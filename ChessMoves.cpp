@@ -74,7 +74,7 @@ class ChessMoves
 		int newFile = ChangeLetterToNumber(newPosition.substr(0, 1));
 		int newFile = int(newPosition.substr(1, 1));
 
-		//Check for legal move depending on piece and making sure they don't create a check on their own king by doing so
+		//Make a check for legal move depending on piece and making sure they don't create a check on their own king by doing so
 
 		file = newFile;
 		rank = newRank;
