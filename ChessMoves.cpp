@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "Chess.cpp"
+#include <list>
 using namespace std;
 
 class ChessMoves
@@ -17,6 +18,7 @@ class ChessMoves
 		//checkPawnMoves(Chess);
 		//legalMove(Chess, string);
 		//Move(Chess, string);
+		//IsOnBoard(string);
 		list<string> StartingMoves();
 
 
@@ -90,20 +92,64 @@ class ChessMoves
 		}
 	}
 
+	static bool ChessMoves::IsOnBoard(string position)
+	{
+		int rank = ChangeLetterToNumber(position.substr(0, 1));
+		int file = stoi(position.substr(1, 1));
+		if((rank > 0 & rank < 9) & (file > 0 & file < 9))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	list<string> ChessMoves::checkKingMoves(Chess piece)
 	{
 		int currentFile = piece.GetFile();
-		int currentRow = piece.GetRank();
+		int currentRank = piece.GetRank();
 
-		list<string> possibleMoves();
+		std::list<string> Moves();
+		std::string possibleMoves[8] = { };
 		
-		
+		for(int x = 0; x < 8; x++){
+			possibleMoves[x] = currentFile + (currentRank + 1);
+			possibleMoves[x] = currentFile + (currentRank - 1);
+			possibleMoves[x] = (currentFile + 1) + (currentRank + 1);
+			possibleMoves[3] = (currentFile + 1) + (currentRank - 1);
+			possibleMoves[x] = (currentFile - 1) + (currentRank + 1);
+			possibleMoves[x] = (currentFile - 1) + (currentRank - 1);
+			possibleMoves[x] = (currentFile + 1) + currentRank;
+			possibleMoves[x] = (currentFile - 1) + currentRank;
+		}
+		for(string entry : possibleMoves) {
+			if (IsOnBoard(entry) & ){//Needs to add other checks for if it's legal: if it's covered w another piece of the same color
+				Moves.push_back(entry);//Why does this need to be of class type?
+			}
+		}
 	}
 
 	list<string> ChessMoves::checkQueenMoves(Chess piece)
 	{
+		int currentFile = piece.GetFile();
+		int currentRank = piece.GetRank();
+
+		std::list<string> Moves();
+		std::string possibleMoves[8] = { };
 		
-		std::list<string> possibleMoves();
+		for(int x = 0; x < 8; x++){
+			possibleMoves[x] = currentFile + (currentRank + 1);
+			possibleMoves[x] = currentFile + (currentRank - 1);
+			possibleMoves[x] = (currentFile + 1) + (currentRank + 1);
+			possibleMoves[3] = (currentFile + 1) + (currentRank - 1);
+			possibleMoves[x] = (currentFile - 1) + (currentRank + 1);
+			possibleMoves[x] = (currentFile - 1) + (currentRank - 1);
+			possibleMoves[x] = (currentFile + 1) + currentRank;
+			possibleMoves[x] = (currentFile - 1) + currentRank;
+		}
+		
 		
 		
 	}
