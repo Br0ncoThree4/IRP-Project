@@ -2,9 +2,12 @@
 #include <string>
 #include "Chess.cpp"
 #include <list>
+#ifndef NULL
+#define NULL 0
+#endif
 using namespace std;
 
-class ChessMoves
+class ChessMoves : public Chess
 {
 	private:
 		bool kingInCheck; //Checks if king is in check
@@ -106,7 +109,7 @@ class ChessMoves
 		}
 	}
 
-	list<string> ChessMoves::checkKingMoves(Chess piece)
+	static list<string> ChessMoves::checkKingMoves(Chess piece)
 	{
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
@@ -125,7 +128,7 @@ class ChessMoves
 			possibleMoves[x] = (currentFile - 1) + currentRank;
 		}
 		for(string entry : possibleMoves) {
-			if (IsOnBoard(entry) & ){//Needs to add other checks for if it's legal: if it's covered w another piece of the same color
+			if (IsOnBoard(entry)){//Needs to add other checks for if it's legal: if it's covered w another piece of the same color
 				Moves.push_back(entry);//Why does this need to be of class type?
 			}
 		}

@@ -2,36 +2,42 @@
 #include <string>
 #include <list>
 #include "Chess.cpp"
+#include <array>
+#ifndef NULL
+#define NULL 0
+#endif
 using namespace std;
 
-class ChessBoard {
+class ChessBoard : public ChessMoves
+{
     public:
-        void Board(list<Chess>);
+        static void Board(list<Chess>);
     private:
 
     
 
 
-    void ChessBoard::Board(list<Chess> pieceList) {//Creates the 2D array that is the board, given the list of starting chess pieces
+    static void ChessBoard::Board(list<Chess> pieceList) {//Creates the 2D array that is the board, given the list of starting chess pieces
         Chess board[8][8];
-        for()
         
         for (Chess piece : pieceList) {//putting each chess piece on their starting squares
             int rank = piece.GetRank();
             int file = piece.GetFile();
-            theBoard[rank][file] = piece;
+            board[rank][file] = piece;
         }
         for (int row = 8; row > 0; row++) { //printing the board and its square number
             for (int col = 0; col < 8; col++) {
-                if (theBoard[row][col] != 0) {
-                    std::cout << theBoard[row][col].GetColor() << " " << theBoard[row][col].GetType();
+                if (board[row][col].GetFile() != NULL) {
+                    std::cout << board[row][col].GetColor() << " " << board[row][col].GetType();
                 }
                 else {
-                    std::cout << "abcdefgh"[row] << (col + 1);
-                    std::cout << "\t";
+                    std::cout << "\t \t \t \t"; //trying to space the board out so that even if theres nothing, the board still kind of keeps is square shape
                 }
+
+                    std::cout << "(" << "abcdefgh"[row] << (col + 1) << ")" << "\t";
             }
             std::cout << endl;
         }
     }
-}
+    //we also need a printing method for the chess board
+};;
