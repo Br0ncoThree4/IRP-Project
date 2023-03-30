@@ -1,3 +1,5 @@
+using namespace std;
+
 #include <iostream>
 #include <string>
 #include "Chess.cpp"
@@ -5,9 +7,9 @@
 #ifndef NULL
 #define NULL 0
 #endif
-using namespace std;
 
-class ChessMoves : public Chess
+
+class ChessMoves : public Chess//Must get rid of in order to get pieces to move
 {
 	private:
 		bool kingInCheck; //Checks if king is in check
@@ -50,32 +52,6 @@ class ChessMoves : public Chess
 		return moves;
 	}
 
-
-	void ChessMoves::legalMove(Chess piece, string loc)
-	{
-		if (piece.GetType() == "King") {
-			//checkKingMoves(piece);
-			//if() //Make sure king isn't in check after move
-		}
-		else if (piece.GetType() == "Queen") {
-			//checkQueenMoves(piece);
-		}
-		else if (piece.GetType() == "Bishop") {
-			//checkBishopMoves(piece);
-		}
-		else if (piece.GetType() == "Knight") {
-			//checkKnightMoves(piece);
-		}
-		else if (piece.GetType() == "Rook") {
-			//checkRookMoves(piece);
-		}
-		else if (piece.GetType() == "Pawn") {
-			//checkPawnMoves(piece);
-		}
-		
-	}
-
-
 	static void ChessMoves::Move(Chess piece, string newPosition) {
 		//Make a check to make sure !blockingChess is true before the move can be made
 
@@ -109,13 +85,20 @@ class ChessMoves : public Chess
 		}
 	}
 
+	static bool ChessMoves::IsSquareOpen(Chess piece, string position)
+	{
+		string type = piece.GetType();
+		if()
+	}
+
+
 	static list<string> ChessMoves::checkKingMoves(Chess piece)
 	{
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
 
-		std::list<string> Moves();
-		std::string possibleMoves[8] = { };
+		list<string> Moves();
+		string possibleMoves[8] = { };
 		
 		for(int x = 0; x < 8; x++){
 			possibleMoves[x] = currentFile + (currentRank + 1);
@@ -134,7 +117,7 @@ class ChessMoves : public Chess
 		}
 	}
 
-	list<string> ChessMoves::checkQueenMoves(Chess piece)
+	static list<string> ChessMoves::checkQueenMoves(Chess piece)
 	{
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
@@ -146,16 +129,36 @@ class ChessMoves : public Chess
 			possibleMoves[x] = currentFile + (currentRank + 1);
 			possibleMoves[x] = currentFile + (currentRank - 1);
 			possibleMoves[x] = (currentFile + 1) + (currentRank + 1);
-			possibleMoves[3] = (currentFile + 1) + (currentRank - 1);
+			possibleMoves[x] = (currentFile + 1) + (currentRank - 1);
 			possibleMoves[x] = (currentFile - 1) + (currentRank + 1);
 			possibleMoves[x] = (currentFile - 1) + (currentRank - 1);
 			possibleMoves[x] = (currentFile + 1) + currentRank;
 			possibleMoves[x] = (currentFile - 1) + currentRank;
 		}
-		
-		
+		for(string move : possibleMoves)
+		{
+			if(IsOnBoard(move) & )
+		}
 		
 	}
+
+	static list<string> ChessMoves::checkBishopMoves(Chess piece)
+	{
+		int currentFile = piece.GetFile();
+		int currentRank = piece.GetRank();
+
+		std::list<string> Moves(); //what will be returned to the method
+		std::list<string> possibleMoves();
+	}
+
+	static list<string> ChessMoves::checkKnightMoves(Chess piece)
+	{}
+
+	static list<string> ChessMoves::checkRookMoves(Chess piece)
+	{}
+
+	static list<string> ChessMoves::checkPawnMoves(Chess piece)
+	{}
 
 	/**
 	 * void ChessMoves::LegalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
@@ -205,8 +208,93 @@ class ChessMoves : public Chess
 		}
 
 	}
+
+
+	//other legalMove method--
+
+	void ChessMoves::legalMove(Chess piece, string loc)
+	{
+		if (piece.GetType() == "King") {
+			//checkKingMoves(piece);
+			//if() //Make sure king isn't in check after move
+		}
+		else if (piece.GetType() == "Queen") {
+			//checkQueenMoves(piece);
+		}
+		else if (piece.GetType() == "Bishop") {
+			//checkBishopMoves(piece);
+		}
+		else if (piece.GetType() == "Knight") {
+			//checkKnightMoves(piece);
+		}
+		else if (piece.GetType() == "Rook") {
+			//checkRookMoves(piece);
+		}
+		else if (piece.GetType() == "Pawn") {
+			//checkPawnMoves(piece);
+		}
+		
+	}
 	 * 
 	 */
+
+	void ChessMoves::legalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
+	{
+		string type = piece.GetType();
+		list<string> possibleMoves;
+		//Finding list of legal moves, depending on each piece
+		if(type == "King")
+		{
+			//list<string> possibleMoves(checkKingMoves(piece));
+			possibleMoves = checkKingMoves(piece);
+			
+		}
+		else if(type == "Queen")
+		{
+			possibleMoves = checkQueenMoves(piece);
+
+		}
+		else if(type == "Bishop")
+		{
+			possibleMoves = checkBishopMoves(piece);
+
+		}
+		else if(type == "Knight")
+		{
+			possibleMoves = checkKnightMoves(piece);
+
+		}
+		else if(type == "Rook")
+		{
+			possibleMoves = checkRookMoves(piece);
+
+		}
+		else if(type == "Pawn")
+		{
+			possibleMoves = checkPawnMoves(piece);
+
+		}
+		else
+		{
+			std::cout<<"Your type of piece is " << type << ", and that is not in the list of chess pieces";
+		}
+
+
+
+		while (true) {//Check if new square is part of legal moves for that piece
+			for (int k = 0; k < possibleMoves.size(), k++) {
+				if (possibleMoves[k] == newPosition)
+				{
+					piece.SetPosition(newPosition);
+					"Your move " << piece.GetType() << " to " << newPosition << " was played";
+					break;
+				}
+			}
+			//Only gets here is the hopeful move is not a part of the legal moves
+			std::cout<<"Your desired move was not legal, please try again";
+		}
+
+	}
 
 	static int ChessMoves::ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 		string str = "abcdefgh";

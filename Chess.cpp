@@ -6,6 +6,7 @@
 #endif
 using namespace std;
 
+
 class Chess
 {
 	private:
