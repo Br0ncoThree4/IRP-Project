@@ -16,7 +16,6 @@ class ChessBoardMoves : public Chess
         ChessBoardMoves(list<Chess>);
         Chess board[8][8];
         bool kingInCheck; //Checks if king is in check
-		bool blockingCheck; //Checks if king will be in check if this piece is moved
 		static string alphabet;
 	public:
 		list<string> checkKingMoves(Chess);
@@ -55,7 +54,7 @@ class ChessBoardMoves : public Chess
         }
         for (int row = 8; row > 0; row++) { //printing the board and its square number
             for (int col = 0; col < 8; col++) {
-                if (board[row][col].GetFile() != NULL) {
+                if (board[row][col].GetType() != "NULL") {
                     std::cout << board[row][col].GetColor() << " " << board[row][col].GetType();
                 }
                 else {
@@ -111,6 +110,293 @@ class ChessBoardMoves : public Chess
 
 	bool ChessBoardMoves::IsBlockingCheck(Chess piece)
 	{
+        bool isBlockingDiagonalCheck = false;
+        bool isBlockingLineCheck = false;
+        int currentFile = piece.GetFile();
+		int currentRank = piece.GetRank();
+        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        
+        //If king is in open sight of piece (need to check all diagonals and lines)
+        //diagonals check
+        int counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile + counter))
+            {
+                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank + counter][currentFile + counter].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank + counter][currentFile + counter].GetType() == "King")
+                    {
+                        isBlockingDiagonalCheck = true;
+                    }
+                    else
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile - counter))
+            {
+                if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank - counter][currentFile - counter].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank - counter][currentFile - counter].GetType() == "King")
+                    {
+                        isBlockingDiagonalCheck = true;
+                    }
+                    else
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile + counter))
+            {
+                if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank - counter][currentFile + counter].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank - counter][currentFile + counter].GetType() == "King")
+                    {
+                        isBlockingDiagonalCheck = true;
+                    }
+                    else
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile - counter))
+            {
+                if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank + counter][currentFile - counter].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank + counter][currentFile - counter].GetType() == "King")
+                    {
+                        isBlockingDiagonalCheck = true;
+                    }
+                    else
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        //rook moves
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile))
+            {
+                if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank + counter][currentFile].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank + counter][currentFile].GetType() == "King")//piece of same color is blocking king
+                    {
+                        isBlockingLineCheck = true;
+                    }
+                    else//piece of same color isn't king
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile))
+            {
+                if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank - counter][currentFile].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank - counter][currentFile].GetType() == "King")
+                    {
+                        isBlockingLineCheck = true;
+                    }
+                    else
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank, currentFile + counter))
+            {
+                if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank][currentFile + counter].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank][currentFile + counter].GetType() == "King")
+                    {
+                        isBlockingLineCheck = true;
+                    }
+                    else
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank, currentFile - counter))
+            {
+                if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    if(board[currentRank][currentFile - counter].GetColor() == "NULL") //square is empty: keep looking
+                    {
+                        counter++;
+                    }
+                    else //square has other color's piece
+                    {
+                        counter = 8;
+                    }
+                }
+                else//square is the same color
+                {
+                    if(board[currentRank][currentFile - counter].GetType() == "King")
+                    {
+                        isBlockingLineCheck = true;
+                    }
+                    else
+                    {
+                        counter = 8;
+                    }
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        if(isBlockingDiagonalCheck == false & isBlockingLineCheck == false)//Is the piece blocking check
+        {
+            return false;
+        }
+
+        //piece must be blocking check
+        if(isBlockingDiagonalCheck)
+        {
+
+        }
+        else//isBlockingLineCheck
+        {
+            
+        }
 
 	}
 	bool ChessBoardMoves::IsInCheck(Chess king, list<string> possibleMoves)//See if king is in check (possibleMoves is the list of moves of the opposite color than the king)
@@ -159,6 +445,7 @@ class ChessBoardMoves : public Chess
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
+        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
 		string type = "K";
 
 		if(type != piece.GetType().substr(0, 1))
@@ -170,42 +457,42 @@ class ChessBoardMoves : public Chess
 		
 		if(IsOnBoard(currentRank + 1, currentFile) & board[currentRank + 1][currentFile].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank - 1, currentFile) & board[currentRank - 1][currentFile].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank + 1, currentFile + 1) & board[currentRank + 1][currentFile + 1].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank - 1, currentFile + 1) & board[currentRank - 1][currentFile + 1].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank + 1, currentFile - 1) & board[currentRank + 1][currentFile - 1].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank - 1, currentFile - 1) & board[currentRank - 1][currentFile - 1].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank, currentFile + 1) & board[currentRank][currentFile + 1].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile + 1, 1) + to_string(currentRank);
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank, currentFile - 1) & board[currentRank][currentFile - 1].GetType() != piece.GetType())
 		{
-			string position = type + alphabet.substr(currentFile - 1, 1) + to_string(currentRank);
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank);
 			possibleMoves.push_back(position);
 		}
 		
@@ -217,6 +504,7 @@ class ChessBoardMoves : public Chess
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
+        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
 		string type = "Q";
 
 		if(type != piece.GetType().substr(0,1))
@@ -224,7 +512,178 @@ class ChessBoardMoves : public Chess
 			cout << "Your piece is a " << piece.GetType() << ", not a Queen, as was expected by the checkQueenMoves method";
 			return possibleMoves;
 		}
-		//Add Bishop and Rook moves
+
+        //bishop moves
+        int counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile + counter))
+            {
+                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//square is open or can be taken
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is occupied by same color piece
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile - counter))
+            {
+                if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile + counter))
+            {
+                if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile - counter))
+            {
+                if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        //rook moves
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile))
+            {
+                if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile))
+            {
+                if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank, currentFile + counter))
+            {
+                if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank, currentFile - counter))
+            {
+                if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        return possibleMoves;
 	}
 
 	list<string> ChessBoardMoves::checkBishopMoves(Chess piece) //will return B*file letter**rank number (as string)*
@@ -232,6 +691,7 @@ class ChessBoardMoves : public Chess
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
+        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
 		string type = "B";
 
 		if(type != piece.GetType().substr(0,1))
@@ -239,6 +699,92 @@ class ChessBoardMoves : public Chess
 			cout << "Your piece is a " << piece.GetType() << ", not a Bishop, as was expected by the checkBishopMoves method";
 			return possibleMoves;
 		}
+
+        int counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile + counter))
+            {
+                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//square is open or can be taken
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is occupied by same color piece
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile - counter))
+            {
+                if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile + counter))
+            {
+                if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile - counter))
+            {
+                if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        return possibleMoves;
 	}
 
 	list<string> ChessBoardMoves::checkKnightMoves(Chess piece) //Will return N
@@ -246,6 +792,7 @@ class ChessBoardMoves : public Chess
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
+        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
 		string type = "N";
 
 		if("K" != piece.GetType().substr(0, 1))
@@ -256,42 +803,42 @@ class ChessBoardMoves : public Chess
 
 		if(IsOnBoard(currentRank + 1, currentFile + 2) & board[currentRank + 1][currentFile + 2].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile + 2, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank - 1, currentFile + 2) & board[currentRank - 1][currentFile + 2].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile + 2, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank - 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank + 1, currentFile - 2) & board[currentRank + 1][currentFile - 2].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile - 2, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank - 1, currentFile - 2) & board[currentRank - 1][currentFile - 2].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile - 2, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank - 1);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank + 2, currentFile + 1) & board[currentRank + 2][currentFile + 1].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 2);
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 2);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank + 2, currentFile - 1) & board[currentRank + 2][currentFile - 1].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 2);
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 2);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank - 2, currentFile + 1) & board[currentRank - 2][currentFile + 1].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 2);
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 2);
 			possibleMoves.push_back(position);
 		}
 		if(IsOnBoard(currentRank - 2, currentFile - 1) & board[currentRank - 2][currentFile - 1].GetColor() != piece.GetColor())
 		{
-			string position = alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 2);
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 2);
 			possibleMoves.push_back(position);
 		}
 
@@ -303,6 +850,7 @@ class ChessBoardMoves : public Chess
 		list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
+        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
 		string type = "R";
 
 		if(type != piece.GetType().substr(0, 1))
@@ -310,6 +858,92 @@ class ChessBoardMoves : public Chess
 			cout << "Your piece is a " << piece.GetType() << ", not a Rook, as was expected by the checkRookMoves method";
 			return possibleMoves;
 		}
+
+        int counter = 1;
+        do{
+            if(IsOnBoard(currentRank + counter, currentFile))
+            {
+                if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank - counter, currentFile))
+            {
+                if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank, currentFile + counter))
+            {
+                if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        counter = 1;
+        do{
+            if(IsOnBoard(currentRank, currentFile - counter))
+            {
+                if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                {
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank);
+                    possibleMoves.push_back(position);
+                    counter++;
+                }
+                else//square is the same color
+                {
+                    counter = 8;
+                }
+            }
+            else//"square" is off the board
+            {
+                counter = 8;
+            }
+        }while(counter <= 7);
+
+        return possibleMoves;
 	}
 
 	list<string> ChessBoardMoves::checkPawnMoves(Chess piece)
@@ -317,6 +951,7 @@ class ChessBoardMoves : public Chess
 		list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
+        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
 		string type = "P";
 
 		if(type != piece.GetType().substr(0, 1))
@@ -324,6 +959,25 @@ class ChessBoardMoves : public Chess
 			cout << "Your piece is a " << piece.GetType() << ", not a Pawn, as was expected by the checkPawnMoves method";
 			return possibleMoves;
 		}
+
+        if(IsOnBoard(currentRank + 1, currentFile) & board[currentRank + 1][currentFile].GetColor() != piece.GetColor())
+        {
+            string position = type + currentPosition + alphabet.substr(currentFile, 1) + (string)(currentRank + 1);
+            possibleMoves.push_back(position);
+        }
+        if(IsOnBoard(currentRank + 1, currentFile + 1) & board[currentRank + 1][currentFile + 1].GetColor() != piece.GetColor())
+        {
+            string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + (string)(currentRank + 1);
+            possibleMoves.push_back(position);
+        }
+        if(IsOnBoard(currentRank + 1, currentFile - 1) & board[currentRank + 1][currentFile - 1].GetColor() != piece.GetColor())
+        {
+            string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + (string)(currentRank + 1);
+            possibleMoves.push_back(position);
+        }
+        //Add en passant moves??
+
+        return possibleMoves;
 	}
 
 	/**
@@ -509,4 +1163,4 @@ class ChessBoardMoves : public Chess
         std::list<Chess> pieceList = baseObj.Setup();
         obj = ChessBoardMoves(pieceList);
     }
-};;
+}
