@@ -98,7 +98,7 @@ class ChessBoardMoves : public Chess
 
 	void ChessBoardMoves::Move(Chess piece, string newPosition) {
 		
-        if(IsBlockingCheck(piece))
+        if(IsBlockingCheck(piece) == "true")
         {
             cout << "This piece is blocking check, so it can't move";
         }
@@ -118,13 +118,14 @@ class ChessBoardMoves : public Chess
 	}
 
 
-	bool ChessBoardMoves::IsBlockingCheck(Chess piece)
+	list<string> ChessBoardMoves::IsBlockingCheck(Chess piece)
 	{
         bool isBlockingDiagonalCheck = false;
         bool isBlockingLineCheck = false;
         int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank);
+        list<string> positionsBlocking;
         
         //If king is in open sight of piece (need to check all diagonals and lines)
         //diagonals check
@@ -140,6 +141,9 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        //if(board[currentRank + counter][currentFile + counter].GetType() == "Queen" | board[currentRank + counter][currentFile + counter].GetType() == "Bishop"){
+                        positionsBlocking.push_back(alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter));
+                        //}
                         counter = 8;
                     }
                 }
@@ -173,6 +177,7 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        positionsBlocking.push_back(alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter));
                         counter = 8;
                     }
                 }
@@ -206,6 +211,7 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        positionsBlocking.push_back(alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter));
                         counter = 8;
                     }
                 }
@@ -239,6 +245,7 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        positionsBlocking.push_back(alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter));
                         counter = 8;
                     }
                 }
@@ -273,6 +280,7 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        positionsBlocking.push_back(alphabet.substr(currentFile, 1) + to_string(currentRank + counter));
                         counter = 8;
                     }
                 }
@@ -306,6 +314,7 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        positionsBlocking.push_back(alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter));
                         counter = 8;
                     }
                 }
@@ -339,6 +348,7 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        positionsBlocking.push_back(alphabet.substr(currentFile + counter, 1) + to_string(currentRank));
                         counter = 8;
                     }
                 }
@@ -372,6 +382,7 @@ class ChessBoardMoves : public Chess
                     }
                     else //square has other color's piece
                     {
+                        positionsBlocking.push_back(alphabet.substr(currentFile - counter, 1) + to_string(currentRank));
                         counter = 8;
                     }
                 }
@@ -395,19 +406,21 @@ class ChessBoardMoves : public Chess
 
         if(isBlockingDiagonalCheck == false & isBlockingLineCheck == false)//Is the piece blocking check
         {
-            return false;
+            return positionsBlocking;
         }
 
-        //piece must be blocking check
-        if(isBlockingDiagonalCheck)
+        //piece must be blocking check 
+        if(isBlockingDiagonalCheck) //will return the diagonal (a2g8 is the diagonal from a2 to g8)
         {
-
+            cout << "there is at least 1 diagonal that is being "
+            return positionsBlocking;
         }
-        else//isBlockingLineCheck
+        else//isBlockingLineCheck //will return file letter or rank number
         {
             
         }
 
+        
 	}
 	bool ChessBoardMoves::IsInCheck(Chess king, list<string> possibleMoves)//See if king is in check (possibleMoves is the list of moves of the opposite color than the king)
 	{
@@ -1074,6 +1087,9 @@ class ChessBoardMoves : public Chess
 		list<string> possibleMoves;
 		//Finding list of legal moves, depending on each piece
 		possibleMoves = FindMoves(piece);
+
+        //editing list if piece is blocking check
+
 
 		while (true) {//Check if new square is part of legal moves for that piece
 			for (string move : possibleMoves)
