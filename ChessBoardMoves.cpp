@@ -96,15 +96,25 @@ class ChessBoardMoves : public Chess
 		return moves;
 	}
 
-	static void ChessBoardMoves::Move(Chess piece, string newPosition) {
-		//Make a check to make sure !blockingChess is true before the move can be made
+	void ChessBoardMoves::Move(Chess piece, string newPosition) {
+		
+        if(IsBlockingCheck(piece))
+        {
+            cout << "This piece is blocking check, so it can't move";
+        }
+        else{
+
+        
 
 		int newRank = ChangeLetterToNumber(newPosition.substr(0, 1));
-		string newFile = newPosition.substr(1, 1);
-		string newPosition = newFile + to_string(newRank);
+		int newFile = stoi(newPosition.substr(1, 1));
 
-
-		piece.SetPosition(newPosition);
+        //move the piece
+        board[piece.GetRank()][piece.GetFile()] = Chess();
+        board[newRank][newFile] = piece;
+            
+        piece.SetPosition(newPosition);//set position for the piece's instance variables 
+        }
 	}
 
 
@@ -114,7 +124,7 @@ class ChessBoardMoves : public Chess
         bool isBlockingLineCheck = false;
         int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
-        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank);
         
         //If king is in open sight of piece (need to check all diagonals and lines)
         //diagonals check
@@ -962,17 +972,17 @@ class ChessBoardMoves : public Chess
 
         if(IsOnBoard(currentRank + 1, currentFile) & board[currentRank + 1][currentFile].GetColor() != piece.GetColor())
         {
-            string position = type + currentPosition + alphabet.substr(currentFile, 1) + (string)(currentRank + 1);
+            string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
             possibleMoves.push_back(position);
         }
         if(IsOnBoard(currentRank + 1, currentFile + 1) & board[currentRank + 1][currentFile + 1].GetColor() != piece.GetColor())
         {
-            string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + (string)(currentRank + 1);
+            string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1);
             possibleMoves.push_back(position);
         }
         if(IsOnBoard(currentRank + 1, currentFile - 1) & board[currentRank + 1][currentFile - 1].GetColor() != piece.GetColor())
         {
-            string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + (string)(currentRank + 1);
+            string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1);
             possibleMoves.push_back(position);
         }
         //Add en passant moves??
@@ -1066,9 +1076,9 @@ class ChessBoardMoves : public Chess
 		possibleMoves = FindMoves(piece);
 
 		while (true) {//Check if new square is part of legal moves for that piece
-			for (int k = 0; k < possibleMoves.size(), k++)
+			for (string move : possibleMoves)
 			{
-				if (possibleMoves[k] == newPosition) //If true, move
+				if (move == newPosition) //If true, move
 				{
 					piece.SetPosition(newPosition);
 					cout << "Your move " << piece.GetType() << " to " << newPosition << " was played";
@@ -1163,4 +1173,4 @@ class ChessBoardMoves : public Chess
         std::list<Chess> pieceList = baseObj.Setup();
         obj = ChessBoardMoves(pieceList);
     }
-}
+};
