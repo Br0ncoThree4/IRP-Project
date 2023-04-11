@@ -10,7 +10,7 @@ using namespace std;
 #define NULL 0
 #endif
 
-class Tester : public ChessBoard
+class Tester : public ChessBoardMoves
 {
 
 

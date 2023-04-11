@@ -1,7 +1,11 @@
 #include <iostream>
 #include <string>
 #include <list>
+#ifndef NULL
+#define NULL 0
+#endif
 using namespace std;
+
 
 class Chess
 {
@@ -10,6 +14,7 @@ class Chess
 		string type;
 		int file;
 		int rank;
+		
 		//checkKingMoves(Chess);
 		//checkRookMoves(Chess);
 		//checkBishopMoves(Chess);
@@ -17,37 +22,51 @@ class Chess
 		//checkQueenMoves(Chess);
 		//checkPawnMoves(Chess);
 	public:
+		
+		/*
+		Chess(); //It is defined as being public, but it doesn't work, nor does the default constructor declaration here
+		Chess(const Chess&);
 		Chess(string, string, string, int);
 		Chess(string);
-		Chess::Chess()
-		{
-			color = "NULL Color";
-			type = "NULL Type";
-			file = NULL;
-			rank = NULL;
-		}
 		string GetColor();
 		int GetFile();
 		int GetRank();
 		string GetType();
 		void SetFile(string);
 		void SetRank(string);
-		void SetPosition(string);
+		//Move(string);
 		list<Chess> Setup();
 		int ChangeLetterToNumber(string);
+		*/
 
 
 
 
 
-		Chess::Chess(string c, string t, string f, int r) //parameterized constructor
+		Chess() //This constructor isn't accessible by other classes and I don't know why
+			{
+				color = "NULL Color";
+				type = "NULL Type";
+				file = NULL;
+				rank = NULL;
+			}
+
+		Chess(const Chess& piece)//copy constructor
+		{
+			color = piece.color;
+			type = piece.type;
+			file = piece.file;
+			rank = piece.rank;
+		}
+
+		Chess(string c, string t, string f, int r) //parameterized constructor
 		{
 			color = c;
 			type = t;
 			file = ChangeLetterToNumber(f);
 			rank = r;
 		}
-		Chess::Chess(string loc) //Starting square constructor
+		Chess(string loc) //Starting square constructor
 		{
 			
 			rank = stoi(loc.substr(1, 1));
@@ -56,65 +75,53 @@ class Chess
 			if (rank == 1 || rank == 2) //White Starting ranks
 			{
 				color = "White";
-					if(rank == 2) {//Starting White Pawn rank (rank 2)
-						type = "Pawn";
-
+				if(rank == 2) {//Starting White Pawn rank (rank 2)
+					type = "Pawn";
 					}
-					else if (loc == "a1" || loc == "h1") { //Starting White Rook positions
-						type = "Rook";
-
+				else if (loc == "a1" || loc == "h1") { //Starting White Rook positions
+					type = "Rook";
 					}
-					else if (loc == "b1" || loc == "g1") {//Starting White Knight positions
-						type = "Knight";
-
+				else if (loc == "b1" || loc == "g1") {//Starting White Knight positions
+					type = "Knight";
 					}
-					else if (loc == "c1" || loc == "f1") {//Starting White Bishop positions
-						type = "Bishop";
-
+				else if (loc == "c1" || loc == "f1") {//Starting White Bishop positions
+					type = "Bishop";
 					}
-					else if (loc == "d1") {//Starting White Queen position
-						type = "Queen";
-
+				else if (loc == "d1") {//Starting White Queen position
+					type = "Queen";
 					}
-					else if (loc == "e1") {//Starting White King position
-						type = "King";
-
+				else if (loc == "e1") {//Starting White King position
+					type = "King";
 					}
-					else {
-						cout << "The non-starting position inputted was" << loc;
-						color = "NULL Color";
-						type = "NULL Type";
-						file = NULL;
-						rank = NULL;
-						cout << "Must be out of bounds, as the piece should be in ranks 1 and 2, but isn't in the selected range - probably due to file number";
-					}
+				else {
+					cout << "The non-starting position inputted was" << loc;
+					color = "NULL Color";
+					type = "NULL Type";
+					file = NULL;
+					rank = NULL;
+					cout << "Must be out of bounds, as the piece should be in ranks 1 and 2, but isn't in the selected range - probably due to file number";
+				}
 			}
 			else if (rank == 7 || rank == 8) //Black Starting ranks
 			{
 				color = "Black";
 				if (rank == 7) { //Starting Black Pawn rank (rank 7)
 					type = "Pawn";
-
 				}
 				else if (loc == "a8" || loc == "h8") { //Starting Black Rook positions
 					type = "Rook";
-
 				}
 				else if (loc == "b8" || loc == "g8") {//Starting Black Knight positions
 					type = "Knight";
-
 				}
 				else if (loc == "c8" || loc == "f8") {//Starting Black Bishop positions
 					type = "Knight";
-
 				}
 				else if (loc == "d8") {//Starting Black Queen positions
 					type = "Queen";
-
 				}
 				else if (loc == "e8") {//Starting Black King positions
 					type = "King";
-
 				}
 				else {
 					cout << "The non-starting position inputted was " << loc;
@@ -132,11 +139,11 @@ class Chess
 				type = "NULL Type";
 				file = NULL;
 				rank = NULL;
-
 			}
 		}
-
-	static int Chess::ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
+	
+	
+	static int ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 		string str = "abcdefgh";
 		return static_cast<int>(str.find_first_of(letter)) + 1;
 	}
@@ -144,27 +151,27 @@ class Chess
 	
 	//Getter methods
 
-	string Chess::GetColor() {
+	string GetColor() {
 		return color;
 	}
-	int Chess::GetFile() {
+	int GetFile() {
 		return file;
 	}
-	int Chess::GetRank() {
+	int GetRank() {
 		return rank;
 	}
-	string Chess::GetType() {
+	string GetType() {
 		return type;
 	}
 
 	//Changing the position
-	void Chess::SetPosition(string newPosition) {
+	void SetPosition(string newPosition) {
 		this->file = ChangeLetterToNumber(newPosition.substr(0, 1));
 		this->rank = stoi(newPosition.substr(1, 1));
 	}
 
 	//Creating basic board
-	list<Chess> Chess::Setup()
+	static list<Chess> Setup()
 	{
 		list<Chess> pieceList;
 

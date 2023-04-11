@@ -12,12 +12,15 @@ using namespace std;
 class ChessBoardMoves : public Chess
 {
     public:
-        ChessBoardMoves();
+        Chess board[8][8];
+        bool kingInCheck; //Checks if king is in check
+		static string alphabet;
+        /**
+         * ChessBoardMoves();
         ChessBoardMoves(list<Chess>);
         Chess board[8][8];
         bool kingInCheck; //Checks if king is in check
 		static string alphabet;
-	public:
 		list<string> checkKingMoves(Chess);
 		list<string> checkRookMoves(Chess);
 		list<string> checkBishopMoves(Chess);
@@ -29,10 +32,11 @@ class ChessBoardMoves : public Chess
 		bool IsOnBoard(string);
 		list<string> FindMoves(Chess);
 		list<string> StartingMoves();
-
+         * 
+         */
     
 
-    ChessBoardMoves::ChessBoardMoves()
+    ChessBoardMoves()
     {
         for (int r = 0; r < 8; r++)
         {
@@ -44,7 +48,7 @@ class ChessBoardMoves : public Chess
 		alphabet = "abcdefgh";
     }
 
-    ChessBoardMoves::ChessBoardMoves(list<Chess> pieceList) {//Creates the 2D array that is the board, given the list of starting chess pieces
+    ChessBoardMoves(list<Chess> pieceList) {//Creates the 2D array that is the board, given the list of starting chess pieces
         Chess Board[8][8];
         
         for (Chess piece : pieceList) {//putting each chess piece on their starting squares
@@ -75,7 +79,7 @@ class ChessBoardMoves : public Chess
 
 
 
-	list<string> ChessBoardMoves::StartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few letters)
+	list<string> StartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few letters)
 	{
 		list<string> moves; //White Starting Moves
 		//Pawn Moves
@@ -96,9 +100,9 @@ class ChessBoardMoves : public Chess
 		return moves;
 	}
 
-	void ChessBoardMoves::Move(Chess piece, string newPosition) {
-		
-        if(IsBlockingCheck(piece) == "true")
+	void Move(Chess piece, string newPosition) {
+		list<string> emptyList;
+        if(IsBlockingCheck(piece) == emptyList)
         {
             cout << "This piece is blocking check, so it can't move";
         }
@@ -118,7 +122,7 @@ class ChessBoardMoves : public Chess
 	}
 
 
-	list<string> ChessBoardMoves::IsBlockingCheck(Chess piece)
+	list<string> IsBlockingCheck(Chess piece)
 	{
         bool isBlockingDiagonalCheck = false;
         bool isBlockingLineCheck = false;
@@ -412,7 +416,7 @@ class ChessBoardMoves : public Chess
         //piece must be blocking check 
         if(isBlockingDiagonalCheck) //will return the diagonal (a2g8 is the diagonal from a2 to g8)
         {
-            cout << "there is at least 1 diagonal that is being "
+            cout << "there is at least 1 diagonal that is being blocked";
             return positionsBlocking;
         }
         else//isBlockingLineCheck //will return file letter or rank number
@@ -422,7 +426,7 @@ class ChessBoardMoves : public Chess
 
         
 	}
-	bool ChessBoardMoves::IsInCheck(Chess king, list<string> possibleMoves)//See if king is in check (possibleMoves is the list of moves of the opposite color than the king)
+	bool IsInCheck(Chess king, list<string> possibleMoves)//See if king is in check (possibleMoves is the list of moves of the opposite color than the king)
 	{
 		string position = alphabet.substr(king.GetFile(), 1) + to_string(king.GetRank());
 		for(string move: possibleMoves)
@@ -435,7 +439,7 @@ class ChessBoardMoves : public Chess
 		return false;
 	}
 
-	static bool ChessBoardMoves::IsOnBoard(string position)
+	static bool IsOnBoard(string position)
 	{
 		int rank = ChangeLetterToNumber(position.substr(0, 1));
 		int file = stoi(position.substr(1, 1));
@@ -449,7 +453,7 @@ class ChessBoardMoves : public Chess
 		}
 	}
 
-	static bool ChessBoardMoves::IsOnBoard(int rank, int file)
+	static bool IsOnBoard(int rank, int file)
 	{
 		
 		if((rank > 0 & rank < 9) & (file > 0 & file < 9))
@@ -463,7 +467,7 @@ class ChessBoardMoves : public Chess
 	}
 
 
-	list<string> ChessBoardMoves::checkKingMoves(Chess piece) // will return K*file letter**rank number (as a string)*
+	list<string> checkKingMoves(Chess piece) // will return K*file letter**rank number (as a string)*
 	{
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
@@ -522,7 +526,7 @@ class ChessBoardMoves : public Chess
 		return possibleMoves;
 	}
 
-	list<string> ChessBoardMoves::checkQueenMoves(Chess piece)
+	list<string> checkQueenMoves(Chess piece)
 	{
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
@@ -709,7 +713,7 @@ class ChessBoardMoves : public Chess
         return possibleMoves;
 	}
 
-	list<string> ChessBoardMoves::checkBishopMoves(Chess piece) //will return B*file letter**rank number (as string)*
+	list<string> checkBishopMoves(Chess piece) //will return B*file letter**rank number (as string)*
 	{
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
@@ -810,7 +814,7 @@ class ChessBoardMoves : public Chess
         return possibleMoves;
 	}
 
-	list<string> ChessBoardMoves::checkKnightMoves(Chess piece) //Will return N
+	list<string> checkKnightMoves(Chess piece) //Will return N
 	{
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
@@ -868,7 +872,7 @@ class ChessBoardMoves : public Chess
 		return possibleMoves;
 	}
 
-	list<string> ChessBoardMoves::checkRookMoves(Chess piece)
+	list<string> checkRookMoves(Chess piece)
 	{
 		list<string> possibleMoves;
 		int currentFile = piece.GetFile();
@@ -969,7 +973,7 @@ class ChessBoardMoves : public Chess
         return possibleMoves;
 	}
 
-	list<string> ChessBoardMoves::checkPawnMoves(Chess piece)
+	list<string> checkPawnMoves(Chess piece)
 	{
 		list<string> possibleMoves;
 		int currentFile = piece.GetFile();
@@ -1081,7 +1085,7 @@ class ChessBoardMoves : public Chess
 	 * 
 	 */
 
-	void ChessBoardMoves::LegalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
+	void LegalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
 	{
 		string type = piece.GetType();
 		list<string> possibleMoves;
@@ -1107,7 +1111,7 @@ class ChessBoardMoves : public Chess
 
 	}
 
-	list<string> ChessBoardMoves::FindMoves(Chess piece)
+	list<string> FindMoves(Chess piece)
 	{
 		list<string> possibleMoves;
 		string type = piece.GetType();
@@ -1150,7 +1154,7 @@ class ChessBoardMoves : public Chess
 		return possibleMoves;
 	}
 
-	list<string> ChessBoardMoves::TotalPossibleMoves(string color)
+	list<string> TotalPossibleMoves(string color)
 	{
 		list<Chess> piecesOfColor;
 		list<string> possibleMoves;
@@ -1176,7 +1180,7 @@ class ChessBoardMoves : public Chess
 		return possibleMoves;
 	}
 
-	static int ChessBoardMoves::ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
+	static int ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 		string str = "abcdefgh";
 		return str.find_first_of(letter) + 1;
 	}
@@ -1188,5 +1192,15 @@ class ChessBoardMoves : public Chess
         ChessBoardMoves obj;
         std::list<Chess> pieceList = baseObj.Setup();
         obj = ChessBoardMoves(pieceList);
+
+
+
+
+
+
+
+
+
+        return 0;
     }
 };
