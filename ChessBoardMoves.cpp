@@ -148,29 +148,86 @@ class ChessBoardMoves : public Chess
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank);
         list<string> positionsBlocking;
+        string areaBlocking;
         
         //If king is in open sight of piece (need to check all diagonals and lines)
 
         //If the piece is blocking a bishop/queen on diagonals or rook/queen on files, it should keep the threatening piece's position
 
-        //diagonals check
-
-        string kingPosition;
+        int kingFile;
+        int kingRank;
         for(int row = 0; row < 8; row++)
         {
             for(Chess possibleKing : board[row])
             {
                 if(possibleKing.GetType() == "King" & possibleKing.GetColor() == piece.GetColor())
                 {
-                    kingPosition = alphabet.substr(currentFile, 1) + to_string(currentRank);
+                    kingFile = possibleKing.GetFile();
+                    kingRank = possibleKing.GetRank();
                 }
             }
         }
+        
+        //diagonals check
         int counter = 1;
+        if((kingFile - kingRank) == (currentFile - currentRank))//on bottom left to top right diagonal
+        {
+            bool isBlockingCheck = true;
+            for(int diff = abs(kingFile - currentFile) - 1; diff > 0; diff++)//diff is the difference btwn current position and king position (kingFile != currentFile if the conditional runs)
+            {
+                if(kingFile > currentFile)//king is to the right of current piece
+                {
+                    if(board[kingRank - diff][kingFile - diff] != Chess())
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+                else//king is to the left of current piece
+                {
+                    if(board[kingRank + diff][kingFile + diff] != Chess())
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+            }
+            isBlockingDiagonalCheck = isBlockingCheck;//if the line of sight is there, set iBDC to true; if not, make it false
+        }
+        else if((kingFile + kingRank) == (currentFile + currentRank))//top left to bottom right diagonal
+        {
+            bool isBlockingCheck = true;
+            for(int diff = abs(kingFile - currentFile) - 1; diff > 0; diff++)
+            {
+                if(kingFile > currentFile)//king is to the left (below) the current piece
+                {
+                    if(board[kingFile - diff][kingRank + diff] != Chess())
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+                else//king is to the right (above) the current piece
+                {
+                    if(board[kingFile + diff][kingRank - diff] != Chess())
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+            }
+            isBlockingDiagonalCheck = isBlockingCheck;
+        }
+        else if(kingFile == currentFile)
+        {
+
+        }
+        else if(kingRank == currentRank)
+        {
+
+        }
+
+        
         do{
             if(IsOnBoard(currentRank + counter, currentFile + counter))
             {
-                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
                 {
                     if(board[currentRank + counter][currentFile + counter].GetColor() == "NULL") //square is empty: keep looking
                     {
