@@ -43,15 +43,15 @@ class Chess
 
 
 
-		Chess() //This constructor isn't accessible by other classes and I don't know why
+		Chess()//default constructor (empty square)
 			{
 				color = "NULL Color";
 				type = "NULL Type";
-				file = NULL;
-				rank = NULL;
+				file;
+				rank;
 			}
 
-		Chess(const Chess& piece)//copy constructor
+		Chess(Chess& piece)//copy constructor
 		{
 			color = piece.color;
 			type = piece.type;
@@ -97,8 +97,8 @@ class Chess
 					cout << "The non-starting position inputted was" << loc;
 					color = "NULL Color";
 					type = "NULL Type";
-					file = NULL;
-					rank = NULL;
+					file = -1;
+					rank = -1;
 					cout << "Must be out of bounds, as the piece should be in ranks 1 and 2, but isn't in the selected range - probably due to file number";
 				}
 			}
@@ -127,8 +127,8 @@ class Chess
 					cout << "The non-starting position inputted was " << loc;
 					color = "NULL Color";
 					type = "NULL Type";
-					file = NULL;
-					rank = NULL;
+					file = -1;
+					rank = -1;
 					cout << "Must be out of bounds, as the piece should be in ranks 7 or 8, but isn't in the selected range - probably due to file number";
 				}
 			}
@@ -137,8 +137,8 @@ class Chess
 				cout << "The non-starting position inputted was " << loc;
 				color = "NULL Color";
 				type = "NULL Type";
-				file = NULL;
-				rank = NULL;
+				file = -1;
+				rank = -1;
 			}
 		}
 	

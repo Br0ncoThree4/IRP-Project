@@ -18,6 +18,11 @@ class ChessBoardMoves : public Chess
 		static string alphabet;
         list<Chess> blackPieces;
         list<Chess> whitePieces;
+        bool MoveWentThrough;
+        list<string> previousWhiteMoves;
+        list<string> previousBlackMoves;
+        list<Chess[8][8]> boardList;
+        Chess defaultChess;
 
         /**
          * ChessBoardMoves();
@@ -40,13 +45,13 @@ class ChessBoardMoves : public Chess
          */
     
 
-    ChessBoardMoves()
+    ChessBoardMoves()//empty board
     {
         for (int r = 0; r < 8; r++)
         {
-            for(int c = 0; c < 8; c++)
+            for(int f = 0; f < 8; f++)
             {
-                board[r][c] = Chess();
+                board[r][f] = Chess();
             }
         }
 		alphabet = "abcdefgh";
@@ -54,6 +59,11 @@ class ChessBoardMoves : public Chess
         blackKingInCheck = false;
         whitePieces;
         blackPieces;
+        MoveWentThrough = true;
+        previousWhiteMoves;
+        previousBlackMoves;
+        boardList.push_back(board);
+        defaultChess = Chess();
     }
 
     ChessBoardMoves(list<Chess> pieceList) {//Creates the 2D array that is the board, given the list of starting chess pieces
@@ -74,7 +84,7 @@ class ChessBoardMoves : public Chess
         }
         for (int row = 8; row > 0; row++) { //printing the board and its square number
             for (int col = 0; col < 8; col++) {
-                if (board[row][col].GetType() != "NULL") {
+                if (board[row][col].GetType() != Chess().GetType()) {
                     std::cout << board[row][col].GetColor() << " " << board[row][col].GetType();
                 }
                 else {
@@ -89,6 +99,11 @@ class ChessBoardMoves : public Chess
 		alphabet = "abcdefgh";
         whiteKingInCheck = false;
         blackKingInCheck = false;
+        MoveWentThrough = true;
+        previousWhiteMoves = WhiteStartingMoves();
+        previousBlackMoves = BlackStartingMoves();
+        boardList.push_back(board);
+        defaultChess = Chess();
     }
     //we also need a printing method for the chess board
 
@@ -97,57 +112,311 @@ class ChessBoardMoves : public Chess
 
 
 
-	list<string> StartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few letters)
+	list<string> WhiteStartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few letters)
 	{
 		list<string> moves; //White Starting Moves
 		//Pawn Moves
-		for(int k = 1; k <= 8; k++){
-			string file = to_string("abcdefgh"[k-1]);
+		for(int k = 0; k <= 7; k++){
+			string file = alphabet.substr(k, 1);
 			moves.push_back(file + "3");
 			moves.push_back(file + "4");
 		}
 		//Knight Moves
 		for(int k = 1; k <= 2; k++){
-			int startingFile = k/2*5 + 1;//gets file to be either 1 or 6 (B or G)
+			int middleFile = k/2*5 + 1;//gets file to be either 1 or 6 (B or G)
 			int startingRank = 1;
 			for(int x = -1; x <= 1; x+= 2){
-				string newFile = to_string("abcdefghijk"[startingFile + x]);
+				string newFile = alphabet.substr(middleFile + x, 1);
 				moves.push_back(newFile + to_string(startingRank + 2));
 			}
 		}
 		return moves;
 	}
 
-	void Move(Chess piece, string newPosition) {
-		list<string> emptyList;
-        if(IsBlockingCheck(piece) == emptyList)
+    list<string> BlackStartingMoves()
+    {
+        list<string> moves;
+        //Pawn Moves
+        for(int k = 0; k <= 7; k++)
         {
-            cout << "This piece is blocking check, so it can't move";
+            string file = to_string(alphabet[k]);
+            moves.push_back(file + "6");
+            moves.push_back(file + "5");
         }
-        else{
+        //Knight Moves
+        for(int k = 1; k <= 2; k++)
+        {
+            int middleFile = k/2*5 + 1;//file is either 1 or 6 (B or G)
+            int startingRank = 8;
+            for(int x = -1; x <= 1; x += 2)
+            {
+                string newFile = alphabet.substr(middleFile + x, 1);
+                moves.push_back(newFile + to_string(startingRank - 2));
+            }
+        }
+        return moves;
+    }
 
-        
+	void Move(Chess piece, string newPosition) 
+    {
+		string block = IsBlockingCheck(piece);//stores piece type and location (such as Ke1) or ""
+        if(block != "")
+        {
+            cout << "This piece is blocking check from " + block + ", so it can't move";
+        }
+        else
+        {
+		    int newRank = ChangeLetterToNumber(newPosition.substr(0, 1));
+		    int newFile = stoi(newPosition.substr(1, 1));
 
-		int newRank = ChangeLetterToNumber(newPosition.substr(0, 1));
-		int newFile = stoi(newPosition.substr(1, 1));
-
-        //move the piece
-        board[piece.GetRank()][piece.GetFile()] = Chess();
-        board[newRank][newFile] = piece;
+            //move the piece
+            board[piece.GetRank()][piece.GetFile()] = Chess();
+            board[newRank][newFile] = piece;
             
-        piece.SetPosition(newPosition);//set position for the piece's instance variables 
+            piece.SetPosition(newPosition);//set position for the piece's instance variables 
         }
 	}
 
+    void Move(string color, string move)
+    {
+        string type = move.substr(0, 1);
+        int newRank;
+        int newFile;
+        Chess piece;
+        string newPosition;
 
-	list<string> IsBlockingCheck(Chess piece)
+        if(move.find("x") != -1)
+        {
+            move = move.substr(0, move.find("x")) + move.substr(move.find("x"), 2);
+            if(color == "White")
+            {
+                for(Chess possibleTakenPiece : blackPieces)
+                {
+                    if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) & possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
+                    {
+                        blackPieces.remove(possibleTakenPiece);
+                    }
+                }
+            }
+            else if(color == "White")//just in case another color comes through
+            {
+                for(Chess possibleTakenPiece : blackPieces)
+                {
+                    if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) & possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
+                    {
+                        whitePieces.remove(possibleTakenPiece);
+                    }
+                }
+            }
+        }
+        if(move.find("+") != -1)//note that the king is in check?
+        {
+            move = move.substr(0, move.find("+"));//would be at the end, so this would just cut it off
+        }
+        if(move.find("#") != -1)//end method?
+        {
+            move = move.substr(0, move.find("#"));//would be at the end, so this could just cut off the method (if it was true)
+        }
+
+        newPosition = move.substr(move.length() - 2, 2);
+
+        //check for break methods
+        if(move == "BOARD")
+        {
+            //print method of board lists
+            list<Chess[8][8]> tempBoardList = boardList;
+            for(int counter = 1; counter < boardList.size(); counter++)
+            {
+                Chess theBoard[8][8];
+                for(int r = 0; r < 8; r++)
+                {
+                    for(int c = 0; c < 8; c++)
+                    {
+                        theBoard[r][c] = tempBoardList.front()[r][c];
+                    }
+                }
+                tempBoardList.pop_front();
+                cout << "Board number " << counter << ":";
+                for(int r = 0; r <= 7; r++)
+                {
+                    for(int c = 0; c <= 7; c++)
+                    {
+                        if(theBoard[r][c].GetColor() != defaultChess.GetColor())
+                        {
+                            Chess piece = theBoard[r][c];
+                            cout << piece.GetColor() + " " << piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " << piece.GetRank() << " ";
+                        }
+                        cout << "endl";
+                    }
+                }
+                cout << "\n\n";
+                counter++;
+            }
+        }
+        else if(move == "PIECELIST")
+        {
+            cout << "WHITE PIECE LIST";
+            for(Chess piece : whitePieces)
+            {
+                cout << "White " << piece.GetType() + " " << piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " + piece.GetRank() << " ";
+            }
+            cout << "endl";
+
+            cout << "BLACK PIECE LIST";
+            for(Chess piece : blackPieces)
+            {
+                cout << "Black " << piece.GetType() << " " + piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " << piece.GetRank() + " ";
+            }
+        }
+        //need to find piece that is gonna be moved (if it's a normal move)
+        else if(color == "White")
+        {
+            list<Chess> pieces;
+            for(Chess piece : whitePieces)
+            {
+                if(piece.GetType().substr(0, 1) == type)
+                {
+                    pieces.push_back(piece);
+                }
+            }
+            if(pieces.size() == 1)
+            {
+                piece = pieces.front();
+                newPosition = move.substr(move.length() - 2, 2);
+            }
+            else
+            {
+                for(Chess possiblePiece : pieces)
+                {
+                    if(move.length() == 3)//Re1 (can't use anything to find location)
+                    {
+                        list<string> possibleMoves = FindMoves(possiblePiece);
+                        for(string possibleMove : possibleMoves)
+                        {
+                            if(possibleMove == move.substr(1, 2))//if possibleMove = the move
+                            {
+                                piece = possiblePiece;
+                            }
+                        }
+                    }
+                    else if(move.length() == 4)//Ree1 or R1e1
+                    {
+                        int file;
+                        int rank;
+                        if(alphabet.find(move.substr(1, 1)) == -1)//second character isn't a file (second character is a rank number)
+                        {
+                            rank = stoi(move.substr(1, 1));
+                            if(possiblePiece.GetRank() == rank)
+                            {
+                                piece = possiblePiece;
+                            }
+                        }
+                        else//second character is a letter (second character is a file letter)
+                        {
+                            file = alphabet.find(move.substr(1, 1));
+                            if(possiblePiece.GetFile() == file)
+                            {
+                                piece = possiblePiece;
+                            }
+                        }   
+                    }
+                    else if(move.length() == 5)//Re1e2
+                    {
+                        int rank = stoi(move.substr(2, 1));
+                        int file = alphabet.find(move.substr(1, 1));
+                        piece = board[rank][file];
+                    }
+                }
+            }
+        }
+        else//color == black
+        {
+            list<Chess> pieces;
+            for(Chess piece : blackPieces)
+            {
+                if(piece.GetType().substr(0, 1) == type)
+                {
+                    pieces.push_back(piece);
+                }
+            }
+            if(pieces.size() == 1)
+            {
+                piece = pieces.front();
+            }
+            else
+            {
+                for(Chess possiblePiece : pieces)
+                {
+                    if(move.length() == 3)//Re1 (can't use anything to find location)
+                    {
+                        list<string> possibleMoves = FindMoves(possiblePiece);
+                        for(string possibleMove : possibleMoves)
+                        {
+                            if(possibleMove == move.substr(1, 2))//if possibleMove = the move
+                            {
+                                piece = possiblePiece;
+                            }
+                        }
+                    }
+                    else if(move.length() == 4)//Ree1 or R1e1
+                    {
+                        int file;
+                        int rank;
+                        if(alphabet.find(move.substr(1, 1)) == -1)//second character isn't a file (second character is a rank number)
+                        {
+                            rank = stoi(move.substr(1, 1));
+                            if(possiblePiece.GetRank() == rank)
+                            {
+                                piece = possiblePiece;
+                            }
+                        }
+                        else//second character is a letter (second character is a file letter)
+                        {
+                            file = alphabet.find(move.substr(1, 1));
+                            if(possiblePiece.GetFile() == file)
+                            {
+                                piece = possiblePiece;
+                            }
+                        }   
+                    }
+                    else if(move.length() == 5)//Re1e2
+                    {
+                        int rank = stoi(move.substr(2, 1));
+                        int file = alphabet.find(move.substr(1, 1));
+                        piece = board[rank][file];
+                    }
+                }
+            }
+        }
+
+        //make sure piece isn't pinned
+        string block = IsBlockingCheck(piece);//stores piece type and location (such as Ke1) or ""
+        if(block != "")
+        {
+            cout << "This piece is blocking check from " + block + ", so it can't move";
+        }
+        else//if not pinned, we can move it
+        {
+		    int newRank = ChangeLetterToNumber(newPosition.substr(0, 1));
+		    int newFile = stoi(newPosition.substr(1, 1));
+
+            //move the piece
+            board[piece.GetRank()][piece.GetFile()] = Chess();
+            board[newRank][newFile] = piece;
+            
+            piece.SetPosition(newPosition);//set position for the piece's instance variables 
+        }
+    }
+
+
+	string IsBlockingCheck(Chess piece)//will return piece type and location that is getting blocked or will return ""
 	{
         bool isBlockingDiagonalCheck = false;
         bool isBlockingLineCheck = false;
         int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank);
-        list<string> positionsBlocking;
+        string pieceGettingBlocked;
         string areaBlocking;
         
         //If king is in open sight of piece (need to check all diagonals and lines)
@@ -160,7 +429,7 @@ class ChessBoardMoves : public Chess
         {
             for(Chess possibleKing : board[row])
             {
-                if(possibleKing.GetType() == "King" & possibleKing.GetColor() == piece.GetColor())
+                if(possibleKing.GetType() == "King" & possibleKing.GetColor() == piece.GetColor())//piece is the correct king
                 {
                     kingFile = possibleKing.GetFile();
                     kingRank = possibleKing.GetRank();
@@ -173,350 +442,402 @@ class ChessBoardMoves : public Chess
         if((kingFile - kingRank) == (currentFile - currentRank))//on bottom left to top right diagonal
         {
             bool isBlockingCheck = true;
+            bool isToRightAndAbove = kingFile > currentFile;//if kingFile > currentFile, king is to the right of currentPiece, so king is also above currentPiece
+            bool checkToLeftAndBelow;
             for(int diff = abs(kingFile - currentFile) - 1; diff > 0; diff++)//diff is the difference btwn current position and king position (kingFile != currentFile if the conditional runs)
             {
-                if(kingFile > currentFile)//king is to the right of current piece
+                if(isToRightAndAbove)//king is to the right of current piece
                 {
-                    if(board[kingRank - diff][kingFile - diff] != Chess())
+                    checkToLeftAndBelow = true;
+                    if(board[kingRank - diff][kingFile - diff].GetColor() == "White" | board[kingRank - diff][kingFile - diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
                 }
                 else//king is to the left of current piece
                 {
-                    if(board[kingRank + diff][kingFile + diff] != Chess())
+                    checkToLeftAndBelow = false;//check to the right of currentPiece
+                    if(board[kingRank + diff][kingFile + diff].GetColor() == "White" | board[kingRank + diff][kingFile + diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
                 }
             }
             isBlockingDiagonalCheck = isBlockingCheck;//if the line of sight is there, set iBDC to true; if not, make it false
+            //need to check if there's an opposite queen or bishop on the diagonal
+            if(isBlockingDiagonalCheck)
+            {
+                if(checkToLeftAndBelow)//check below and to the left of currentPiece for queen/bishop
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank - x, currentFile - x))
+                        {
+                            Chess possibleBlocker = board[currentRank - x][currentFile + x];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //increment, square is empty
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//is piece of the same color, can't be checking the king
+                            }
+                            else//possibleBlocker is other color
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Bishop")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "";//ends the loop is it isn't on board, can return "" because there's nothing else that could be trying to check the king
+                        }
+                    }
+                }
+                else//check above and to the right of currentPiece for queen/bishop
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank + x, currentFile + x))
+                        {
+                            Chess possibleBlocker = board[currentRank][currentFile + x];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //square is empty, keep looking (this just ends this iteration of the for loop and allows x to increment)
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//ends loop: same color, can't be blocking check, can return ""
+                            }
+                            else
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Bishop")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "";//ends the loop, can return ""
+                        }
+                    }
+                }
+            }
         }
         else if((kingFile + kingRank) == (currentFile + currentRank))//top left to bottom right diagonal
         {
             bool isBlockingCheck = true;
+            bool kingToLeftAndAbove = kingFile < currentFile;//if king is to the left of currentPiece, he will also be above it, or neither are true
+            bool checkToRightAndBelow;
             for(int diff = abs(kingFile - currentFile) - 1; diff > 0; diff++)
             {
-                if(kingFile > currentFile)//king is to the left (below) the current piece
+                if(kingToLeftAndAbove)//king is to the left (and above) the current piece
                 {
-                    if(board[kingFile - diff][kingRank + diff] != Chess())
+                    checkToRightAndBelow = true;
+                    if(board[kingFile - diff][kingRank + diff].GetColor() == "White" | board[kingFile - diff][kingRank + diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
                 }
-                else//king is to the right (above) the current piece
+                else//king is to the right (and below) the current piece
                 {
-                    if(board[kingFile + diff][kingRank - diff] != Chess())
+                    checkToRightAndBelow = false;
+                    if(board[kingFile + diff][kingRank - diff].GetColor() == "White" | board[kingFile + diff][kingRank - diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
                 }
             }
             isBlockingDiagonalCheck = isBlockingCheck;
+            //need to check if there's an opposite queen or bishop on the diagonal
+            if(isBlockingDiagonalCheck)
+            {
+                if(checkToRightAndBelow)//check below and to the right of currentPiece for queen/bishop
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank - x, currentFile + x))
+                        {
+                            Chess possibleBlocker = board[currentRank - x][currentFile + x];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //increment, square is empty
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//is piece of the same color, can't be checking the king
+                            }
+                            else//possibleBlocker is other color
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Bishop")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "";//ends the loop is it isn't on board, can return "" because there's nothing else that could be trying to check the king
+                        }
+                    }
+                }
+                else//check above and to the left currentPiece for queen/bishop
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank + x, currentFile - x))
+                        {
+                            Chess possibleBlocker = board[currentRank][currentFile + x];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //square is empty, keep looking (this just ends this iteration of the for loop and allows x to increment)
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//ends loop: same color, can't be blocking check, can return ""
+                            }
+                            else
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "";//ends the loop, can return ""
+                        }
+                    }
+                }
+            }
         }
+        //line checks
         else if(kingFile == currentFile)
         {
+            bool isBlockingCheck = true;
+            bool kingIsAbove = kingRank > currentRank;
+            bool belowCheck;//belowCheck is false = check above the currentPiece (only used if piece is blocking check)
+            for(int diff = abs(kingRank - currentRank) - 1; diff > 0; diff++)
+            {
+                if(kingIsAbove)//king is above the currentpiece
+                {
+                    belowCheck = true;
+                    if(board[kingFile][kingRank - diff].GetColor() != defaultChess.GetColor())
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+                else//king is below the currentPiece
+                {
+                    belowCheck = false;
+                    if(board[kingFile][currentRank + diff].GetColor() == "White" | board[kingFile][currentRank + diff].GetColor() == "Black")
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+            }
 
+            isBlockingLineCheck = isBlockingCheck;
+            //need to do check for rook/queen on file pinching currentPiece to king if isBlockingCheck is true
+            if(isBlockingLineCheck)
+            {
+                if(belowCheck)//check below the currentPiece for queen/rook
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank - x, currentFile))
+                        {
+                            Chess possibleBlocker = board[currentRank - x][currentFile];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //increment
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//is piece of the same color, can't be checking the king
+                            }
+                            else//possibleBlocker is other color
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "";//ends the loop is it isn't on board, can return "" because there's nothing else that could be trying to check the king
+                        }
+                    }
+                }
+                else//check above the currentPiece for queen/rook
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank + x, currentFile))
+                        {
+                            Chess possibleBlocker = board[currentRank + x][currentFile];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //square is empty, keep looking (this just ends this iteration of the for loop and allows x to increment)
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//ends loop: same color, can't be blocking check, can return ""
+                            }
+                            else
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else//if not on board
+                        {
+                            return "";//ends the loop, can return ""
+                        }
+                    }
+                }
+            }
         }
         else if(kingRank == currentRank)
         {
-
+            bool isBlockingCheck = true;
+            bool kingToRight = kingFile > currentFile;
+            bool leftCheck;//rightCheck is false = check to the right of the currentPiece (only used if piece is blocking check)
+            for(int diff = abs(kingFile - currentFile) - 1; diff > 0; diff++)
+            {
+                if(kingToRight)//king is to the right of the currentPiece
+                {
+                    leftCheck = true;
+                    if(board[kingFile - diff][kingRank].GetColor() == "White" | board[kingFile - diff][kingRank].GetColor() == "Black")
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+                else//king is to the left of the currentPiece
+                {
+                    leftCheck = false;
+                    if(board[kingFile + diff][kingRank].GetColor() == "White" | board[kingFile + diff][kingRank].GetColor() == "Black")
+                    {
+                        isBlockingCheck = false;
+                    }
+                }
+            }
+            isBlockingLineCheck = isBlockingCheck;
+            //need to do check for rook/queen on file pinching currentPiece to king if isBlockingCheck is true
+            if(isBlockingLineCheck)
+            {
+                if(leftCheck)//check to the left of currentPiece for queen/rook
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank, currentFile - x))
+                        {
+                            Chess possibleBlocker = board[currentRank][currentFile - x];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //increment
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//is piece of the same color, can't be checking the king
+                            }
+                            else//possibleBlocker is other color
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "";//ends the loop is it isn't on board, can return "" because there's nothing else that could be trying to check the king
+                        }
+                    }
+                }
+                else//check to the right of currentPiece for queen/rook
+                {
+                    for(int x = 1; x <= 6; x++)
+                    {
+                        if(IsOnBoard(currentRank, currentFile + x))
+                        {
+                            Chess possibleBlocker = board[currentRank][currentFile + x];
+                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            {
+                                //square is empty, keep looking (this just ends this iteration of the for loop and allows x to increment)
+                            }
+                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            {
+                                return "";//ends loop: same color, can't be blocking check, can return ""
+                            }
+                            else
+                            {
+                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                {
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                }
+                                else
+                                {
+                                    return "";//piece won't check King
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "";//ends the loop, can return ""
+                        }
+                    }
+                }
+            }
         }
 
-        
-        do{
-            if(IsOnBoard(currentRank + counter, currentFile + counter))
-            {
-                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
-                {
-                    if(board[currentRank + counter][currentFile + counter].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        //if(board[currentRank + counter][currentFile + counter].GetType() == "Queen" | board[currentRank + counter][currentFile + counter].GetType() == "Bishop"){
-                        positionsBlocking.push_back(board[currentRank + counter][currentFile + counter].GetType().substr(0, 1) + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter)); //adds 
-                        //}
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank + counter][currentFile + counter].GetType() == "King")
-                    {
-                        isBlockingDiagonalCheck = true;
-                    }
-                    else
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        counter = 1;
-        do{
-            if(IsOnBoard(currentRank - counter, currentFile - counter))
-            {
-                if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color)
-                {
-                    if(board[currentRank - counter][currentFile - counter].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        positionsBlocking.push_back(board[currentRank - counter][currentFile - counter].GetType().substr(0, 1) + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter));
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank - counter][currentFile - counter].GetType() == "King")
-                    {
-                        isBlockingDiagonalCheck = true;
-                    }
-                    else
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        counter = 1;
-        do{
-            if(IsOnBoard(currentRank - counter, currentFile + counter))
-            {
-                if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
-                {
-                    if(board[currentRank - counter][currentFile + counter].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        positionsBlocking.push_back(board[currentRank - counter][currentFile + counter].GetType().substr(0, 1) + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter));
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank - counter][currentFile + counter].GetType() == "King")
-                    {
-                        isBlockingDiagonalCheck = true;
-                    }
-                    else
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        counter = 1;
-        do{
-            if(IsOnBoard(currentRank + counter, currentFile - counter))
-            {
-                if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color)
-                {
-                    if(board[currentRank + counter][currentFile - counter].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        positionsBlocking.push_back(board[currentRank + counter][currentFile - counter].GetType().substr(0, 1) + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter));
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank + counter][currentFile - counter].GetType() == "King")
-                    {
-                        isBlockingDiagonalCheck = true;
-                    }
-                    else
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        //rook moves
-        counter = 1;
-        do{
-            if(IsOnBoard(currentRank + counter, currentFile))
-            {
-                if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color)
-                {
-                    if(board[currentRank + counter][currentFile].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        positionsBlocking.push_back(board[currentRank + counter][currentFile].GetType().substr(0, 1) + alphabet.substr(currentFile, 1) + to_string(currentRank + counter));
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank + counter][currentFile].GetType() == "King")//piece of same color is blocking king
-                    {
-                        isBlockingLineCheck = true;
-                    }
-                    else//piece of same color isn't king
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        counter = 1;
-        do{
-            if(IsOnBoard(currentRank - counter, currentFile))
-            {
-                if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color)
-                {
-                    if(board[currentRank - counter][currentFile].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        positionsBlocking.push_back(board[currentRank - counter][currentFile].GetType().substr(0, 1) + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter));
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank - counter][currentFile].GetType() == "King")
-                    {
-                        isBlockingLineCheck = true;
-                    }
-                    else
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        counter = 1;
-        do{
-            if(IsOnBoard(currentRank, currentFile + counter))
-            {
-                if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
-                {
-                    if(board[currentRank][currentFile + counter].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        positionsBlocking.push_back(board[currentRank][currentFile + counter].GetType().substr(0, 1) + alphabet.substr(currentFile + counter, 1) + to_string(currentRank));
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank][currentFile + counter].GetType() == "King")
-                    {
-                        isBlockingLineCheck = true;
-                    }
-                    else
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        counter = 1;
-        do{
-            if(IsOnBoard(currentRank, currentFile - counter))
-            {
-                if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color)
-                {
-                    if(board[currentRank][currentFile - counter].GetColor() == "NULL") //square is empty: keep looking
-                    {
-                        counter++;
-                    }
-                    else //square has other color's piece
-                    {
-                        positionsBlocking.push_back(board[currentRank][currentFile - counter].GetType().substr(0, 1) + alphabet.substr(currentFile - counter, 1) + to_string(currentRank));
-                        counter = 8;
-                    }
-                }
-                else//square is the same color
-                {
-                    if(board[currentRank][currentFile - counter].GetType() == "King")
-                    {
-                        isBlockingLineCheck = true;
-                    }
-                    else
-                    {
-                        counter = 8;
-                    }
-                }
-            }
-            else//"square" is off the board
-            {
-                counter = 8;
-            }
-        }while(counter <= 7);
-
-        if(isBlockingDiagonalCheck == false & isBlockingLineCheck == false)//Is the piece blocking check
-        {
-            return positionsBlocking;
-        }
-
-        //piece must be blocking check 
-        if(isBlockingDiagonalCheck) //will return the diagonal (a2g8 is the diagonal from a2 to g8)
-        {
-            cout << "there is at least 1 diagonal that is being blocked";
-            return positionsBlocking;
-        }
-        else//isBlockingLineCheck //will return file letter or rank number
-        {
-            cout << "there is at least 1 file/rank that is being blocked";
-            return positionsBlocking;
-        }
-
+        return "";//Only gets run if there's no diagonal/line getting blocked, so there's no check getting blocked
         
 	}
+
 	bool IsInCheck(Chess king, list<string> possibleMoves)//See if king is in check (possibleMoves is the list of moves of the opposite color than the king)
 	{
 		string position = alphabet.substr(king.GetFile(), 1) + to_string(king.GetRank());
@@ -1626,25 +1947,43 @@ class ChessBoardMoves : public Chess
 
                 else if(checkingPiece.GetType() == "Knight")//piece must be taken or king move out of the way
                 {
-
+                    if(move.substr(0, 1) == "K")//king: must move out of way of knight
+                    {
+                        list<string> knightMoves = FindMoves(checkingPiece);
+                        for(string kMove : knightMoves)
+                        {
+                            if(move == kMove)
+                            {
+                                possibleMoves.remove(move);
+                            }
+                            //move is king move out of way of king: its good
+                        }
+                    }
+                    else//piece must be taken
+                    {
+                        if(move.substr(3, 2) != alphabet.substr(checkingPiece.GetFile(), 1) + to_string(checkingPiece.GetRank()))//move != cP's position
+                        {
+                            possibleMoves.remove(move);
+                        }
+                    }
                 }
             }
         }
-        
+
+
         else if(piecesCheckingKing.size() > 1)//must move king
         {
             possibleMoves = FindMoves(king);
             for(string move : possibleMoves)
             {
-                for(string otherMove : otherColorMoves)
+                for(string pMove : otherColorMoves)
                 {
-                    if(move == otherMove)
+                    if(move == pMove)//check if new square is covered by another piece
                     {
                         possibleMoves.remove(move);
                     }
                 }
             }
-            return possibleMoves;
         }
 
         return possibleMoves;
@@ -1658,7 +1997,7 @@ class ChessBoardMoves : public Chess
 		possibleMoves = FindMoves(piece);
 
         //editing list if piece is blocking check
-
+        
 
 		while (true) {//Check if new square is part of legal moves for that piece
 			for (string move : possibleMoves)
@@ -1736,7 +2075,7 @@ class ChessBoardMoves : public Chess
 			}
 		}
 
-        //find legal moves
+        //find possible moves
 
 		for(Chess piece : piecesOfColor)
 		{
@@ -1780,14 +2119,186 @@ class ChessBoardMoves : public Chess
 		return str.find_first_of(letter) + 1;
 	}
 
+    string WhiteMove(Chess king, list<string> blackPossibleMoves)//computer is white and makes a move (takes other color's moves to make sure it's not in check)
+    {
+        string whiteMove;
+        previousWhiteMoves = TotalLegalMoves("White", TotalPossibleMoves("White"));//gets legal moves & changes
+        list<string> whitePossibleMoves = previousWhiteMoves;
+        bool kingIsInCheck = IsInCheck(king, blackPossibleMoves);
+        if(kingIsInCheck)
+        {
+            whitePossibleMoves = movesOutOfCheck("White", whitePossibleMoves);
+        }
 
+        //algorithm goes here
+        int moveIndex = rand() % whitePossibleMoves.size();
+        int currentIndex = 0;
+        if(whitePossibleMoves.size() == 0)
+        {
+            return "CHECKMATE, Black wins";
+        }
+        for(string move : whitePossibleMoves)
+        {
+            if(currentIndex = moveIndex)
+            {
+                whiteMove = move;
+                break;
+            }
+            else
+            {
+                currentIndex++;
+            }
+        }
+        return whiteMove;
+
+    }
+
+    string BlackMove(Chess king, list<string> whitePossibleMoves)//computer is black and makes a move (takes other color's moves to make sure it's not in check)
+    {
+        string blackMove;
+        previousBlackMoves = TotalLegalMoves("Black",TotalPossibleMoves("Black"));//gets legal moves
+        list<string> blackPossibleMoves = previousBlackMoves;
+        bool kingIsInCheck = IsInCheck(king, whitePossibleMoves);
+        if(kingIsInCheck)
+        {
+            blackPossibleMoves = movesOutOfCheck("Black", blackPossibleMoves);
+        }
+
+        //algorithm goes here
+        int moveIndex = rand() % blackPossibleMoves.size();
+        int currentIndex = 0;
+        if(whitePossibleMoves.size() == 0)
+        {
+            return "CHECKMATE, White wins";
+        }
+        for(string move : blackPossibleMoves)
+        {
+            if(currentIndex = moveIndex)
+            {
+                blackMove = move;
+                break;
+            }
+            else
+            {
+                currentIndex++;
+            }
+        }
+        return blackMove;
+    }
+
+    void NormalPlay()
+    {
+        bool checkmate = false;
+        for(int row = 0; row < 8; row++)
+        {
+            for(Chess piece : board[row])
+            {
+                if(piece.GetColor() == "White")
+                {
+                    whitePieces.push_back(piece);
+                }
+                else if(piece.GetType() == "Black")
+                {
+                    blackPieces.push_back(piece);
+                }
+                //else: square is empty
+            }
+        }
+        //starting the game
+        string color;
+        cout << "What color would you like? (Black or White)";
+        cin >> color;
+        while(color != "Black" & color != "White")
+        {
+            cout << "Your chosen color wasn't 'Black' or 'White', please input one of those colors to continue";
+            cin >> color;
+        }
+
+        string computerColor;
+        if(color == "White")
+        {
+            computerColor = "Black";
+        }
+        else//color has to be black (the previous check was already done to make sure)
+        {
+            computerColor = "White";
+        }
+
+        if(color == "White")
+        {
+            while(checkmate != true)//whitePlay
+            {
+                string move;
+                cout << "What move would you like to play?";//should be in form (*Letter**Position**New Position)
+                cin >> move;
+                do{
+                    if(MoveWentThrough == false)
+                    {
+                        cout << "Your previous move did not go through, please try again";
+                        cin >> move;
+                        cout << "\n";
+                    }
+                    Move("White", move);
+                }while(MoveWentThrough == false);//once it's true, break the loop and let someone else play (will do the first time regardless)
+                cout << "\n";
+                //BlackMove (Computer)
+                Chess king;
+                for(int row = 0; row < 8; row++)
+                {
+                    for(Chess p : board[row])
+                    {
+                        if(p.GetType() == "King" & p.GetColor() == computerColor)
+                        {
+                            king = p;
+                        }
+                    }
+                }
+                BlackMove(king, previousWhiteMoves);
+            }
+        }
+        else//color == "Black"
+        {
+            while(checkmate != true)//blackPlay
+            {
+                //Human Play
+                list<string> possibleWhiteMoves = WhiteStartingMoves();
+                cout << "What move would you like to play?";//should be in form (*Letter**New Position)
+                string move; 
+                cin >> move;
+                do{
+                    if(MoveWentThrough == false)
+                    {
+                        cout << "Your previous move did not go through, please try again";
+                        cin >> move; 
+                    }
+                    Move("Black", move);
+                }while(MoveWentThrough == false);//once it's true, break the loop and let someone else play (will do the first time regardless)
+
+                //WhiteMove (Computer)
+                Chess king;
+                for(int row = 0; row < 8; row++)
+                {
+                    for(Chess p : board[row])
+                    {
+                        if(p.GetType() == "King" & p.GetColor() == computerColor)
+                        {
+                            king = p;
+                        }
+                    }
+                }
+                WhiteMove(king, previousBlackMoves);
+            }
+        }
+
+        cout << "Checkmate has been played, good game";
+    }
 
     int main(){
         Chess baseObj;
-        ChessBoardMoves obj;
+        ChessBoardMoves board;
         std::list<Chess> pieceList = baseObj.Setup();
-        obj = ChessBoardMoves(pieceList);
-
+        board = ChessBoardMoves(pieceList);//sets up board w starting pieces
+        NormalPlay();
 
 
 
