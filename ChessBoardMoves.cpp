@@ -1,5 +1,4 @@
 using namespace std;
-
 #include <iostream>
 #include <string>
 #include <list>
@@ -9,7 +8,7 @@ using namespace std;
 #define NULL 0
 #endif
 
-class ChessBoardMoves : public Chess
+class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 {
     public:
         Chess board[8][8];
@@ -2291,22 +2290,5 @@ class ChessBoardMoves : public Chess
         }
 
         cout << "Checkmate has been played, good game";
-    }
-
-    int main(){
-        Chess baseObj;
-        ChessBoardMoves board;
-        std::list<Chess> pieceList = baseObj.Setup();
-        board = ChessBoardMoves(pieceList);//sets up board w starting pieces
-        NormalPlay();
-
-
-
-
-
-
-
-
-        return 0;
     }
 };

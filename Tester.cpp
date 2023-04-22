@@ -15,10 +15,21 @@ class Tester : public ChessBoardMoves
 
 
 //want to play chess here: import all other files and game
-int TheMain()
-{
-    std::list<Chess> startingPieces = Setup();
-    std::Board(startingPieces); //creates board, printing out array of chess piece color and type or the square number, if the square is empty
-};
+int main(){
+        Chess baseObj;
+        ChessBoardMoves board;
+        std::list<Chess> pieceList = baseObj.Setup();
+        board = ChessBoardMoves(pieceList);//sets up board w starting pieces
+        NormalPlay();
+
+
+
+
+
+
+
+
+        return 0;
+    }
 
 };;

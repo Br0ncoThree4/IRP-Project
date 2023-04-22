@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.33.31629/include"
+                "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.33.31629/include/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -16,7 +16,7 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64",
-            "configurationProvider": "BartmanAbyss.amiga-debug"
+            "configurationProvider": "ms-vscode.cpptools"//"BartmanAbyss.amiga-debug"
         }
     ],
     "version": 4
