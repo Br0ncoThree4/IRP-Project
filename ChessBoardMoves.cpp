@@ -1717,12 +1717,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     {
                         if(move.substr(0, 1) == "K")//king: move off diagonal
                         {
-                            if((alphabet.find(move.substr(3, 1)) - king.GetFile()) == -(stoi(move.substr(4, 1)) - king.GetRank()))
+                            if((king.GetFile() + king.GetRank()) == (alphabet.find(move.substr(3, 1)) + stoi(move.substr(4, 1))))
                             {
                                 possibleMoves.remove(move);
                             }
                         }
-                        else if((alphabet.find(move.substr(3, 1)) - checkingPiece.GetFile()) != -(stoi(move.substr(4, 1)) - checkingPiece.GetRank()))//piece isn't king and move isn't on diagonal
+                        else if((checkingPiece.GetRank() + checkingPiece.GetFile()) != (stoi(move.substr(4, 1)) + alphabet.find(move.substr(3, 1))))//piece isn't king and move isn't on diagonal
                         {
                             possibleMoves.remove(move);
                         }
@@ -1902,12 +1902,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     {
                         if(move.substr(0, 1) == "K")//king: move off diagonal
                         {
-                            if((alphabet.find(move.substr(3, 1)) - king.GetFile()) == -(stoi(move.substr(4, 1)) - king.GetRank()))
+                            if((king.GetFile() + king.GetRank()) == (alphabet.find(move.substr(3, 1)) + stoi(move.substr(4, 1))))
                             {
                                 possibleMoves.remove(move);
                             }
                         }
-                        else if((alphabet.find(move.substr(3, 1)) - checkingPiece.GetFile()) != -(stoi(move.substr(4, 1)) - checkingPiece.GetRank()))//piece isn't king and move isn't on diagonal
+                        else if((checkingPiece.GetRank() + checkingPiece.GetFile()) != (stoi(move.substr(4, 1)) + alphabet.find(move.substr(3, 1))))//piece isn't king and move isn't on diagonal
                         {
                             possibleMoves.remove(move);
                         }

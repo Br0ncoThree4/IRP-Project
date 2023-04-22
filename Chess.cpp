@@ -164,6 +164,8 @@ class Chess
 		return type;
 	}
 
+	
+
 	//Changing the position
 	void SetPosition(string newPosition) {
 		this->file = ChangeLetterToNumber(newPosition.substr(0, 1));
@@ -230,4 +232,19 @@ class Chess
 	}
 	 */
 
+	/// @brief 
+	/// @param piece 
+	/// @param cPiece 
+	/// @return 
+	friend std::ostream& operator == (Chess piece, Chess& cPiece)
+	{
+		if(piece.GetColor() == cPiece.GetColor() && piece.GetType() == cPiece.GetType() && piece.GetFile() == cPiece.GetFile() && piece.GetRank() == cPiece.GetRank())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 };
