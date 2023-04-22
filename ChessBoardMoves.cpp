@@ -17,10 +17,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		static string alphabet;
         list<Chess> blackPieces;
         list<Chess> whitePieces;
+        list<Chess> totalPieces;
         bool MoveWentThrough;
         list<string> previousWhiteMoves;
         list<string> previousBlackMoves;
-        list<Chess[8][8]> boardList;
+        list<list<Chess>> boardList;
         Chess defaultChess;
 
         /**
@@ -58,10 +59,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         blackKingInCheck = false;
         whitePieces;
         blackPieces;
+        totalPieces;
         MoveWentThrough = true;
         previousWhiteMoves;
         previousBlackMoves;
-        boardList.push_back(board);
+        boardList.push_back(totalPieces);
         defaultChess = Chess();
     }
 
@@ -72,6 +74,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             int rank = piece.GetRank();
             int file = piece.GetFile();
             board[rank][file] = piece;
+            totalPieces.push_back(piece);
             if(piece.GetColor() == "White")
             {
                 whitePieces.push_back(piece);
@@ -101,7 +104,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         MoveWentThrough = true;
         previousWhiteMoves = WhiteStartingMoves();
         previousBlackMoves = BlackStartingMoves();
-        boardList.push_back(board);
+        boardList.push_back(totalPieces);
         defaultChess = Chess();
     }
     //we also need a printing method for the chess board
@@ -189,23 +192,43 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             move = move.substr(0, move.find("x")) + move.substr(move.find("x"), 2);
             if(color == "White")
             {
-                for(Chess possibleTakenPiece : blackPieces)
+                int length = blackPieces.size();
+                list<Chess> tempPieceArray = blackPieces;
+                list<Chess> goodPieces;
+                for(int counter = 0; counter < length; counter++)
                 {
+                    Chess possibleTakenPiece = tempPieceArray.front();
+                    tempPieceArray.pop_front();
                     if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) & possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
                     {
-                        blackPieces.remove(possibleTakenPiece);
+                        //blackPieces.remove(possibleTakenPiece);
+                    }
+                    else
+                    {
+                        goodPieces.push_back(possibleTakenPiece);
                     }
                 }
+                blackPieces = goodPieces;
             }
             else if(color == "White")//just in case another color comes through
             {
-                for(Chess possibleTakenPiece : blackPieces)
+                int length = whitePieces.size();
+                list<Chess> tempPieceArray = whitePieces;
+                list<Chess> goodPieces;
+                for(int counter = 0; counter < length; counter++)
                 {
+                    Chess possibleTakenPiece = tempPieceArray.front();
+                    tempPieceArray.pop_front();
                     if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) & possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
                     {
-                        whitePieces.remove(possibleTakenPiece);
+                        //whitePieces.remove(possibleTakenPiece);
+                    }
+                    else
+                    {
+                        goodPieces.push_back(possibleTakenPiece);
                     }
                 }
+                whitePieces = goodPieces;
             }
         }
         if(move.find("+") != -1)//note that the king is in check?
@@ -223,17 +246,21 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         if(move == "BOARD")
         {
             //print method of board lists
-            list<Chess[8][8]> tempBoardList = boardList;
+            list<list<Chess>> tempBoardList = boardList;
             for(int counter = 1; counter < boardList.size(); counter++)
             {
+                list<Chess> tempBoard = tempBoardList.front();//board as a list of its pieces
+                int length = tempBoard.size();
                 Chess theBoard[8][8];
-                for(int r = 0; r < 8; r++)
+                for(int number = 0; number < length; number++)
                 {
-                    for(int c = 0; c < 8; c++)
-                    {
-                        theBoard[r][c] = tempBoardList.front()[r][c];
-                    }
+                    Chess piece = tempBoard.front();
+                    tempBoard.pop_front();
+                    int rank = piece.GetRank();
+                    int file = piece.GetFile();
+                    theBoard[rank][file] = piece;
                 }
+
                 tempBoardList.pop_front();
                 cout << "Board number " << counter << ":";
                 for(int r = 0; r <= 7; r++)
@@ -294,7 +321,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                         {
                             if(possibleMove == move.substr(1, 2))//if possibleMove = the move
                             {
-                                piece = possiblePiece;
+                                //piece = possiblePiece;
                             }
                         }
                     }
@@ -307,7 +334,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             rank = stoi(move.substr(1, 1));
                             if(possiblePiece.GetRank() == rank)
                             {
-                                piece = possiblePiece;
+                                //piece = possiblePiece;
                             }
                         }
                         else//second character is a letter (second character is a file letter)
@@ -315,7 +342,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             file = alphabet.find(move.substr(1, 1));
                             if(possiblePiece.GetFile() == file)
                             {
-                                piece = possiblePiece;
+                                //piece = possiblePiece;
                             }
                         }   
                     }
@@ -353,7 +380,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                         {
                             if(possibleMove == move.substr(1, 2))//if possibleMove = the move
                             {
-                                piece = possiblePiece;
+                                //piece = possiblePiece;
                             }
                         }
                     }
@@ -366,7 +393,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             rank = stoi(move.substr(1, 1));
                             if(possiblePiece.GetRank() == rank)
                             {
-                                piece = possiblePiece;
+                                //piece = possiblePiece;
                             }
                         }
                         else//second character is a letter (second character is a file letter)
@@ -374,7 +401,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             file = alphabet.find(move.substr(1, 1));
                             if(possiblePiece.GetFile() == file)
                             {
-                                piece = possiblePiece;
+                               //piece = possiblePiece;
                             }
                         }   
                     }

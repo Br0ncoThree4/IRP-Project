@@ -51,7 +51,7 @@ class Chess
 				rank;
 			}
 
-		Chess(Chess& piece)//copy constructor
+		Chess(const Chess& piece)//copy constructor
 		{
 			color = piece.color;
 			type = piece.type;
