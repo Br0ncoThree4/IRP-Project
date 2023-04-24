@@ -3,9 +3,8 @@ using namespace std;
 #include <iostream>
 #include <string>
 #include <list>
-#include "Chess.cpp"
+//#include "Chess.cpp" : don't need this bc it's included for ChessBoardMoves & throws class redefinition error if it's in
 #include "ChessBoardMoves.cpp"
-#include "ChessMoves.cpp"
 #ifndef NULL
 #define NULL 0
 #endif
@@ -13,23 +12,22 @@ using namespace std;
 class Tester : public ChessBoardMoves
 {
 
+};
 
-//want to play chess here: import all other files and game
-int main(){
-        Chess baseObj;
+//want to play chess here, import all other files and game
+    int main()
+    {
+        std::cout.flush();
+        std::cout << "running 1 .." << std::endl;
+        
+        Chess obj = Chess();
+        std::cout << "1" << std::endl;
+        list<Chess> pieceList = obj.Setup();
+        std::cout << "2" << std::endl;
         ChessBoardMoves board;
-        std::list<Chess> pieceList = baseObj.Setup();
         board = ChessBoardMoves(pieceList);//sets up board w starting pieces
-        NormalPlay();
-
-
-
-
-
-
-
+        board.NormalPlay();
+        
 
         return 0;
     }
-
-};;

@@ -14,7 +14,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         Chess board[8][8];
         bool whiteKingInCheck;
         bool blackKingInCheck;
-		static string alphabet;
+		string alphabet;
         list<Chess> blackPieces;
         list<Chess> whitePieces;
         list<Chess> totalPieces;
@@ -68,9 +68,13 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
     }
 
     ChessBoardMoves(list<Chess> pieceList) {//Creates the 2D array that is the board, given the list of starting chess pieces
-        Chess Board[8][8];
-        
-        for (Chess piece : pieceList) {//putting each chess piece on their starting squares
+        defaultChess = Chess();
+        int length = pieceList.size();
+        list<Chess> tempPieceList = pieceList;
+        for (int counter = 0; counter < length; counter++) //putting each chess piece on their starting squares
+        {
+            Chess piece = tempPieceList.front();
+            tempPieceList.pop_front();
             int rank = piece.GetRank();
             int file = piece.GetFile();
             board[rank][file] = piece;
@@ -84,16 +88,16 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 blackPieces.push_back(piece);
             }
         }
-        for (int row = 8; row > 0; row++) { //printing the board and its square number
-            for (int col = 0; col < 8; col++) {
-                if (board[row][col].GetType() != Chess().GetType()) {
-                    std::cout << board[row][col].GetColor() << " " << board[row][col].GetType();
+        for (int rank = 7; rank >= 0; rank--) { //printing the board and its square number
+            for (int col = 0; col <= 7; col++) {
+                if (board[rank][col].GetType() != defaultChess.GetType()) {
+                    std::cout << board[rank][col].GetColor() << " " << board[rank][col].GetType() << "\t";
                 }
                 else {
-                    std::cout << "\t \t \t \t"; //trying to space the board out so that even if theres nothing, the board still kind of keeps is square shape
+                    std::cout << "\t"; //trying to space the board out so that even if theres nothing, the board still kind of keeps is square shape
                 }
-
-                    std::cout << "(" << "abcdefgh"[row] << (col + 1) << ")" << "\t";
+                std::cout << "(" << "abcdefgh"[col] << (rank + 1) << ")" << "\t";
+                cout << "rank " << rank << ", col " << col << endl;
             }
             std::cout << endl;
         }
@@ -105,7 +109,6 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         previousWhiteMoves = WhiteStartingMoves();
         previousBlackMoves = BlackStartingMoves();
         boardList.push_back(totalPieces);
-        defaultChess = Chess();
     }
     //we also need a printing method for the chess board
 
@@ -187,7 +190,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         Chess piece;
         string newPosition;
 
-        if(move.find("x") != -1)
+        if(move.find("x") != -1)//if the x exists in the move
         {
             move = move.substr(0, move.find("x")) + move.substr(move.find("x"), 2);
             if(color == "White")
@@ -199,7 +202,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     Chess possibleTakenPiece = tempPieceArray.front();
                     tempPieceArray.pop_front();
-                    if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) & possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
+                    if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) && possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
                     {
                         //blackPieces.remove(possibleTakenPiece);
                     }
@@ -219,7 +222,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     Chess possibleTakenPiece = tempPieceArray.front();
                     tempPieceArray.pop_front();
-                    if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) & possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
+                    if(possibleTakenPiece.GetFile() == alphabet.find(move.substr(move.length() - 2, 1)) && possibleTakenPiece.GetRank() == stoi(move.substr(move.length() - 1, 1)))
                     {
                         //whitePieces.remove(possibleTakenPiece);
                     }
@@ -263,7 +266,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
                 tempBoardList.pop_front();
                 cout << "Board number " << counter << ":";
-                for(int r = 0; r <= 7; r++)
+                for(int r = 7; r >= 0; r--)//goes through the board like this so it starts at a1 and ends at h8 (bottom left is [0][0], aka a1, so that should be printed last)
                 {
                     for(int c = 0; c <= 7; c++)
                     {
@@ -276,7 +279,6 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     }
                 }
                 cout << "\n\n";
-                counter++;
             }
         }
         else if(move == "PIECELIST")
@@ -294,15 +296,17 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 cout << "Black " << piece.GetType() << " " + piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " << piece.GetRank() + " ";
             }
         }
+
         //need to find piece that is gonna be moved (if it's a normal move)
         else if(color == "White")
         {
             list<Chess> pieces;
             for(Chess piece : whitePieces)
             {
-                if(piece.GetType().substr(0, 1) == type)
+                if(piece.GetType().substr(0, 1) == type || (piece.GetType() == "Knight" && type == "N"))
                 {
                     pieces.push_back(piece);
+                    cout << piece.GetColor() << " " << piece.GetType() << endl;
                 }
             }
             if(pieces.size() == 1)
@@ -360,9 +364,10 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             list<Chess> pieces;
             for(Chess piece : blackPieces)
             {
-                if(piece.GetType().substr(0, 1) == type)
+                if(piece.GetType().substr(0, 1) == type || (piece.GetType() == "Knight" && type == "N"))
                 {
                     pieces.push_back(piece);
+                    cout << piece.GetColor() << " " << piece.GetType() << endl;
                 }
             }
             if(pieces.size() == 1)
@@ -371,8 +376,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             }
             else
             {
-                for(Chess possiblePiece : pieces)
+                list<Chess> tempPieces = pieces;
+                int length = pieces.size();
+                for(int counter = 0; counter < length; counter++)
                 {
+                    Chess possiblePiece = tempPieces.front();
+                    tempPieces.pop_front();
                     if(move.length() == 3)//Re1 (can't use anything to find location)
                     {
                         list<string> possibleMoves = FindMoves(possiblePiece);
@@ -423,14 +432,66 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         }
         else//if not pinned, we can move it
         {
-		    int newRank = ChangeLetterToNumber(newPosition.substr(0, 1));
-		    int newFile = stoi(newPosition.substr(1, 1));
+		    cout << "This piece is not blocking a check" << endl;
+            int newRank = stoi(newPosition.substr(1, 1)) + 1;
+		    int newFile = ChangeLetterToNumber(newPosition.substr(0, 1));
 
             //move the piece
+            cout << "the piece was moved from " << alphabet.substr(piece.GetFile(), 1) << (piece.GetRank() + 1) << " to " << alphabet.substr(newFile, 1) << newRank << endl;
+            
+            if(color == "White")
+            {
+                //whitePieces.remove(piece);
+                int length = whitePieces.size();
+                cout << "Old length: " << length << endl;
+                list<Chess> tempPieces = whitePieces;
+                list<Chess> newPieces;
+                for(int counter = 0; counter < length; counter++)
+                {
+                    Chess tempPiece = tempPieces.front();
+                    tempPieces.pop_front();
+                    if(!(tempPiece.GetType() == piece.GetType()) || !(tempPiece.GetFile() == piece.GetFile()) || !(tempPiece.GetRank() == piece.GetRank()))
+                    {
+                        newPieces.push_front(tempPiece);
+                    }
+                }
+                whitePieces = newPieces;
+                cout << "New length: " << whitePieces.size() << endl;
+            }
+            else
+            {
+                //blackPieces.remove(piece);
+                int length = blackPieces.size();
+                cout << "New length: " << length << endl;
+                list<Chess> tempPieces = blackPieces;
+                list<Chess> newPieces;
+                for(int counter = 0; counter < length; counter++)
+                {
+                    Chess tempPiece = tempPieces.front();
+                    tempPieces.pop_front();
+                    if(!(tempPiece.GetType() == piece.GetType()) || !(tempPiece.GetFile() == piece.GetFile()) || !(tempPiece.GetRank() == piece.GetRank()))
+                    {
+                        newPieces.push_front(tempPiece);
+                    }
+                }
+                blackPieces = newPieces;
+                cout << "New length: " << blackPieces.size() << endl;
+            }
+            cout << "The piece has been removed from its list" << endl;
             board[piece.GetRank()][piece.GetFile()] = Chess();
             board[newRank][newFile] = piece;
             
             piece.SetPosition(newPosition);//set position for the piece's instance variables 
+            if(color == "White")
+            {
+                whitePieces.push_back(piece);
+                cout << "Newer Length: " << whitePieces.size() << endl;
+            }
+            else
+            {
+                blackPieces.push_back(piece);
+                cout << "Newer Length: " << blackPieces.size() << endl;
+            }
         }
     }
 
@@ -455,7 +516,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         {
             for(Chess possibleKing : board[row])
             {
-                if(possibleKing.GetType() == "King" & possibleKing.GetColor() == piece.GetColor())//piece is the correct king
+                if(possibleKing.GetType() == "King" && possibleKing.GetColor() == piece.GetColor())//piece is the correct king
                 {
                     kingFile = possibleKing.GetFile();
                     kingRank = possibleKing.GetRank();
@@ -475,7 +536,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(isToRightAndAbove)//king is to the right of current piece
                 {
                     checkToLeftAndBelow = true;
-                    if(board[kingRank - diff][kingFile - diff].GetColor() == "White" | board[kingRank - diff][kingFile - diff].GetColor() == "Black")
+                    if(board[kingRank - diff][kingFile - diff].GetColor() == "White" || board[kingRank - diff][kingFile - diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
@@ -483,7 +544,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the left of current piece
                 {
                     checkToLeftAndBelow = false;//check to the right of currentPiece
-                    if(board[kingRank + diff][kingFile + diff].GetColor() == "White" | board[kingRank + diff][kingFile + diff].GetColor() == "Black")
+                    if(board[kingRank + diff][kingFile + diff].GetColor() == "White" || board[kingRank + diff][kingFile + diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
@@ -510,9 +571,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Bishop")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Bishop")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -544,9 +605,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Bishop")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Bishop")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -573,7 +634,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(kingToLeftAndAbove)//king is to the left (and above) the current piece
                 {
                     checkToRightAndBelow = true;
-                    if(board[kingFile - diff][kingRank + diff].GetColor() == "White" | board[kingFile - diff][kingRank + diff].GetColor() == "Black")
+                    if(board[kingFile - diff][kingRank + diff].GetColor() == "White" || board[kingFile - diff][kingRank + diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
@@ -581,7 +642,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the right (and below) the current piece
                 {
                     checkToRightAndBelow = false;
-                    if(board[kingFile + diff][kingRank - diff].GetColor() == "White" | board[kingFile + diff][kingRank - diff].GetColor() == "Black")
+                    if(board[kingFile + diff][kingRank - diff].GetColor() == "White" || board[kingFile + diff][kingRank - diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
@@ -608,9 +669,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Bishop")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Bishop")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -642,9 +703,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -680,7 +741,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is below the currentPiece
                 {
                     belowCheck = false;
-                    if(board[kingFile][currentRank + diff].GetColor() == "White" | board[kingFile][currentRank + diff].GetColor() == "Black")
+                    if(board[kingFile][currentRank + diff].GetColor() == "White" || board[kingFile][currentRank + diff].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
@@ -708,9 +769,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -742,9 +803,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -771,7 +832,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(kingToRight)//king is to the right of the currentPiece
                 {
                     leftCheck = true;
-                    if(board[kingFile - diff][kingRank].GetColor() == "White" | board[kingFile - diff][kingRank].GetColor() == "Black")
+                    if(board[kingFile - diff][kingRank].GetColor() == "White" || board[kingFile - diff][kingRank].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
@@ -779,7 +840,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the left of the currentPiece
                 {
                     leftCheck = false;
-                    if(board[kingFile + diff][kingRank].GetColor() == "White" | board[kingFile + diff][kingRank].GetColor() == "Black")
+                    if(board[kingFile + diff][kingRank].GetColor() == "White" || board[kingFile + diff][kingRank].GetColor() == "Black")
                     {
                         isBlockingCheck = false;
                     }
@@ -806,9 +867,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -840,9 +901,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" | possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetRank(), 1) + to_string(possibleBlocker.GetFile());//square has piece that is threatening a check, cannot move this piece
+                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
                                 }
                                 else
@@ -866,7 +927,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
 	bool IsInCheck(Chess king, list<string> possibleMoves)//See if king is in check (possibleMoves is the list of moves of the opposite color than the king)
 	{
-		string position = alphabet.substr(king.GetFile(), 1) + to_string(king.GetRank());
+		string position = alphabet.substr(king.GetFile(), 1) + to_string(king.GetRank() + 1);
 		for(string move: possibleMoves)
 		{
 			if(move == position)
@@ -881,7 +942,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 	{
 		int rank = ChangeLetterToNumber(position.substr(0, 1));
 		int file = stoi(position.substr(1, 1));
-		if((rank > 0 & rank < 9) & (file > 0 & file < 9))
+		if((rank > -1 && rank < 8) && (file > -1 && file < 8))
 		{
 			return true;
 		}
@@ -894,7 +955,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 	static bool IsOnBoard(int rank, int file)
 	{
 		
-		if((rank > 0 & rank < 9) & (file > 0 & file < 9))
+		if((rank > -1 && rank < 8) && (file > -1 && file < 8))
 		{
 			return true;
 		}
@@ -910,54 +971,54 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
-        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "K";
 
-		if(type != piece.GetType().substr(0, 1))
+		if("King" != piece.GetType())
 		{
 			cout << "Your piece is a " << piece.GetType() << ", not a King, as was expected by the checkKingMoves method";
 			return possibleMoves;
 		}
 
 		
-		if(IsOnBoard(currentRank + 1, currentFile) & board[currentRank + 1][currentFile].GetType() != piece.GetType())
+		if(IsOnBoard(currentRank + 1, currentFile) && board[currentRank + 1][currentFile].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile) & board[currentRank - 1][currentFile].GetType() != piece.GetType())
+		if(IsOnBoard(currentRank - 1, currentFile) && board[currentRank - 1][currentFile].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 1, currentFile + 1) & board[currentRank + 1][currentFile + 1].GetType() != piece.GetType())
+		if(IsOnBoard(currentRank + 1, currentFile + 1) && board[currentRank + 1][currentFile + 1].GetColor() != piece.GetColor())
+		{
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1 + 1);
+			possibleMoves.push_back(position);
+		}
+		if(IsOnBoard(currentRank - 1, currentFile + 1) && board[currentRank - 1][currentFile + 1].GetColor() != piece.GetColor())
+		{
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 1 + 1);
+			possibleMoves.push_back(position);
+		}
+		if(IsOnBoard(currentRank + 1, currentFile - 1) && board[currentRank + 1][currentFile - 1].GetColor() != piece.GetColor())
+		{
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1 + 1);
+			possibleMoves.push_back(position);
+		}
+		if(IsOnBoard(currentRank - 1, currentFile - 1) && board[currentRank - 1][currentFile - 1].GetColor() != piece.GetColor())
+		{
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1 + 1);
+			possibleMoves.push_back(position);
+		}
+		if(IsOnBoard(currentRank, currentFile + 1) && board[currentRank][currentFile + 1].GetColor() != piece.GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile + 1) & board[currentRank - 1][currentFile + 1].GetType() != piece.GetType())
-		{
-			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 1);
-			possibleMoves.push_back(position);
-		}
-		if(IsOnBoard(currentRank + 1, currentFile - 1) & board[currentRank + 1][currentFile - 1].GetType() != piece.GetType())
+		if(IsOnBoard(currentRank, currentFile - 1) && board[currentRank][currentFile - 1].GetColor() != piece.GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1);
-			possibleMoves.push_back(position);
-		}
-		if(IsOnBoard(currentRank - 1, currentFile - 1) & board[currentRank - 1][currentFile - 1].GetType() != piece.GetType())
-		{
-			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1);
-			possibleMoves.push_back(position);
-		}
-		if(IsOnBoard(currentRank, currentFile + 1) & board[currentRank][currentFile + 1].GetType() != piece.GetType())
-		{
-			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank);
-			possibleMoves.push_back(position);
-		}
-		if(IsOnBoard(currentRank, currentFile - 1) & board[currentRank][currentFile - 1].GetType() != piece.GetType())
-		{
-			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank);
 			possibleMoves.push_back(position);
 		}
 		
@@ -969,7 +1030,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
-        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "Q";
 
 		if(type != piece.GetType().substr(0,1))
@@ -985,7 +1046,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//square is open or can be taken
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1006,7 +1067,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1027,7 +1088,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1048,7 +1109,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1070,7 +1131,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1091,7 +1152,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1112,7 +1173,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank);
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1133,7 +1194,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank);
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1156,7 +1217,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
-        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "B";
 
 		if(type != piece.GetType().substr(0,1))
@@ -1171,7 +1232,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//square is open or can be taken
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1192,7 +1253,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1213,7 +1274,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1234,7 +1295,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1252,58 +1313,58 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return possibleMoves;
 	}
 
-	list<string> checkKnightMoves(Chess piece) //Will return N
+	list<string> checkKnightMoves(Chess piece) //Will return Ng1f3
 	{
-		std::list<string> possibleMoves;
+		list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
-        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "N";
 
-		if("K" != piece.GetType().substr(0, 1))
+		if("Knight" != piece.GetType())
 		{
 			cout << "Your piece is a " << piece.GetType() << ", not a Knight, as was expected by the checkKnightMoves method";
 			return possibleMoves;
 		}
 
-		if(IsOnBoard(currentRank + 1, currentFile + 2) & board[currentRank + 1][currentFile + 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 1, currentFile + 2) && board[currentRank + 1][currentFile + 2].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank + 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile + 2) & board[currentRank - 1][currentFile + 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 1, currentFile + 2) && board[currentRank - 1][currentFile + 2].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 1, currentFile - 2) & board[currentRank + 1][currentFile - 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 1, currentFile - 2) && board[currentRank + 1][currentFile - 2].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank + 1);
+			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank + 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile - 2) & board[currentRank - 1][currentFile - 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 1, currentFile - 2) && board[currentRank - 1][currentFile - 2].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank - 1);
+			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 2, currentFile + 1) & board[currentRank + 2][currentFile + 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 2, currentFile + 1) && board[currentRank + 2][currentFile + 1].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 2);
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 2 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 2, currentFile - 1) & board[currentRank + 2][currentFile - 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 2, currentFile - 1) && board[currentRank + 2][currentFile - 1].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 2);
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 2 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 2, currentFile + 1) & board[currentRank - 2][currentFile + 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 2, currentFile + 1) && board[currentRank - 2][currentFile + 1].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 2);
+			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 2 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 2, currentFile - 1) & board[currentRank - 2][currentFile - 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 2, currentFile - 1) && board[currentRank - 2][currentFile - 1].GetColor() != piece.GetColor())
 		{
-			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 2);
+			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 2 + 1);
 			possibleMoves.push_back(position);
 		}
 
@@ -1315,7 +1376,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
-        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "R";
 
 		if(type != piece.GetType().substr(0, 1))
@@ -1330,7 +1391,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1351,7 +1412,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter);
+                    string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1372,7 +1433,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank);
+                    string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1393,7 +1454,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
                 {
-                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank);
+                    string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
                     counter++;
                 }
@@ -1416,7 +1477,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		list<string> possibleMoves;
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
-        string currentPosition = alphabet.substr(currentFile) + to_string(currentRank);
+        string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "P";
 
 		if(type != piece.GetType().substr(0, 1))
@@ -1425,20 +1486,51 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 			return possibleMoves;
 		}
 
-        if(IsOnBoard(currentRank + 1, currentFile) & board[currentRank + 1][currentFile].GetColor() != piece.GetColor())
+        if(piece.GetColor() == "White")
         {
-            string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
-            possibleMoves.push_back(position);
+            if(IsOnBoard(currentRank + 1, currentFile) && board[currentRank + 1][currentFile].GetColor() == defaultChess.GetColor())
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1 + 1);
+                possibleMoves.push_back(position);
+            }
+            if(IsOnBoard(currentRank + 1, currentFile + 1) && (board[currentRank + 1][currentFile + 1].GetColor() != piece.GetColor() && board[currentRank + 1][currentFile + 1].GetColor() != defaultChess.GetColor()))
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1 + 1);
+                possibleMoves.push_back(position);
+            }
+            if(IsOnBoard(currentRank + 1, currentFile - 1) && (board[currentRank + 1][currentFile - 1].GetColor() != piece.GetColor() && board[currentRank + 1][currentFile - 1].GetColor() != defaultChess.GetColor()))
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1 + 1);
+                possibleMoves.push_back(position);
+            }
+            if(IsOnBoard(currentRank + 2, currentFile) && board[currentRank + 2][currentFile].GetColor() == defaultChess.GetColor())
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 2 + 1);
+                possibleMoves.push_back(position);
+            }
         }
-        if(IsOnBoard(currentRank + 1, currentFile + 1) & board[currentRank + 1][currentFile + 1].GetColor() != piece.GetColor())
+        else
         {
-            string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1);
-            possibleMoves.push_back(position);
-        }
-        if(IsOnBoard(currentRank + 1, currentFile - 1) & board[currentRank + 1][currentFile - 1].GetColor() != piece.GetColor())
-        {
-            string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1);
-            possibleMoves.push_back(position);
+            if(IsOnBoard(currentRank - 1, currentFile) && board[currentRank - 1][currentFile].GetColor() == defaultChess.GetColor())
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 1 + 1);
+                possibleMoves.push_back(position);
+            }
+            if(IsOnBoard(currentRank - 1, currentFile + 1) && (board[currentRank - 1][currentFile + 1].GetColor() != piece.GetColor() && board[currentRank - 1][currentFile + 1].GetColor() != defaultChess.GetColor()))
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 1 + 1);
+                possibleMoves.push_back(position);
+            }
+            if(IsOnBoard(currentRank - 1, currentFile - 1) && (board[currentRank - 1][currentFile - 1].GetColor() != piece.GetColor() && board[currentRank - 1][currentFile - 1].GetColor() != defaultChess.GetColor()))
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1 + 1);
+                possibleMoves.push_back(position);
+            }
+            if(IsOnBoard(currentRank - 2, currentFile) && board[currentRank - 2][currentFile].GetColor() == defaultChess.GetColor())
+            {
+                string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 2 + 1);
+                possibleMoves.push_back(position);
+            }
         }
         //Add en passant moves??
 
@@ -2090,23 +2182,25 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		list<string> possibleMoves;
 		
 
-		for(int r = 0; r < 8; r++)//find pieces
-		{
-			for(int f = 0; f < 8; f++)
-			{
-				if(board[r][f].GetColor() == color)
-				{
-					piecesOfColor.push_back(board[r][f]);
-				}
-			}
-		}
+		if(color == "White")
+        {
+            piecesOfColor = whitePieces;
+        }
+        else
+        {
+            piecesOfColor = blackPieces;
+        }
 
         //find possible moves
 
-		for(Chess piece : piecesOfColor)
+        int length = piecesOfColor.size();
+        list<Chess> chessPieces = piecesOfColor;
+		for(int counter = 0; counter < length; counter++)
 		{
+            Chess piece = chessPieces.front();
+            chessPieces.pop_front();
 			list<string> newMoves = FindMoves(piece);
-			newMoves.splice(newMoves.end(), possibleMoves);
+			possibleMoves.splice(possibleMoves.begin(), newMoves);
 		}
 
 		return possibleMoves;
@@ -2122,6 +2216,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             if(whiteKingInCheck)//only allow moves that would move out of check, block check, or remove checkingPiece
             {
                 moves = movesOutOfCheck(color, possibleMoves);
+                cout << "The White King is in check" << endl;
                 return moves;
             }
         }
@@ -2129,15 +2224,16 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         {
             if(blackKingInCheck)
             {
+                cout << "The Black King is in check" << endl;
                 moves = movesOutOfCheck(color, possibleMoves);//only allow moves that would move out of check, block check, or remove checkingPiece
                 return moves;
             }
         }
 
+        cout << "The king is not in check" << endl;
         //will only get here if the king isn't in check (list has had no change, so possibleMoves = the legal moves)
+        cout << possibleMoves.size() << endl;
         return possibleMoves;
-
-
     }
 
 	static int ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
@@ -2147,26 +2243,44 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
     string WhiteMove(Chess king, list<string> blackPossibleMoves)//computer is white and makes a move (takes other color's moves to make sure it's not in check)
     {
+        cout << "WhiteMove has started" << endl;
         string whiteMove;
+        cout << previousWhiteMoves.size() << endl;
+        cout << "TotalPossibleMoves('White').size() "  << TotalPossibleMoves("White").size() << endl;
         previousWhiteMoves = TotalLegalMoves("White", TotalPossibleMoves("White"));//gets legal moves & changes
+        cout << previousWhiteMoves.size() << endl;
         list<string> whitePossibleMoves = previousWhiteMoves;
+        for(string move : whitePossibleMoves)
+        {
+            cout << move << " ";
+        }
+        cout << endl;
         bool kingIsInCheck = IsInCheck(king, blackPossibleMoves);
+        cout << "kingIsInCheck:" << kingIsInCheck << endl;
+        cout << "The variables have been initialized" << endl;
         if(kingIsInCheck)
         {
             whitePossibleMoves = movesOutOfCheck("White", whitePossibleMoves);
+            cout << "The king is in check" << endl;
         }
 
+
+        cout << "The algorithm is starting" << endl;
         //algorithm goes here
-        int moveIndex = rand() % whitePossibleMoves.size();
+        int moveIndex = 5;//rand() % whitePossibleMoves.size();
+        cout << "moveIndex is " << moveIndex << endl;
         int currentIndex = 0;
+        cout << "currentIndex is " << currentIndex << endl;
         if(whitePossibleMoves.size() == 0)
         {
+            cout << "CHECKMATE, Black wins" << endl;
             return "CHECKMATE, Black wins";
         }
         for(string move : whitePossibleMoves)
         {
             if(currentIndex = moveIndex)
             {
+                currentIndex++;
                 whiteMove = move;
                 break;
             }
@@ -2175,26 +2289,40 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 currentIndex++;
             }
         }
+
+        
+        cout << "I (the computer) played " << whiteMove << endl;
         return whiteMove;
 
     }
 
     string BlackMove(Chess king, list<string> whitePossibleMoves)//computer is black and makes a move (takes other color's moves to make sure it's not in check)
     {
+        cout << "BlackMove has started" << endl;
         string blackMove;
+        cout << previousBlackMoves.size() << endl;
+        cout << "TotalPossibleMoves('Black').size() "  << TotalPossibleMoves("Black").size() << endl;
         previousBlackMoves = TotalLegalMoves("Black",TotalPossibleMoves("Black"));//gets legal moves
         list<string> blackPossibleMoves = previousBlackMoves;
+        for(string move : blackPossibleMoves)
+        {
+            cout << move << " ";
+        }
+        cout << endl;
         bool kingIsInCheck = IsInCheck(king, whitePossibleMoves);
+        cout << "The variables have been initialized" << endl;
         if(kingIsInCheck)
         {
             blackPossibleMoves = movesOutOfCheck("Black", blackPossibleMoves);
         }
 
+        cout << "The algorithm is starting" << endl;
         //algorithm goes here
         int moveIndex = rand() % blackPossibleMoves.size();
         int currentIndex = 0;
         if(whitePossibleMoves.size() == 0)
         {
+            cout << "CHECKMATE, White wins" << endl;
             return "CHECKMATE, White wins";
         }
         for(string move : blackPossibleMoves)
@@ -2209,34 +2337,53 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 currentIndex++;
             }
         }
+
+        cout << "I (the computer) played " << blackMove << endl;
         return blackMove;
     }
 
     void NormalPlay()
     {
         bool checkmate = false;
+        int whitePieceCounter = 0;
+        int blackPieceCounter = 0;
+        list<Chess> findingWhitePieces;
+        list<Chess> findingBlackPieces;
         for(int row = 0; row < 8; row++)
         {
             for(Chess piece : board[row])
             {
+                cout << piece.GetColor() << " " << piece.GetType() << endl;
                 if(piece.GetColor() == "White")
                 {
-                    whitePieces.push_back(piece);
+
+                    findingWhitePieces.push_back(piece);
+                    whitePieceCounter++;
+                    cout << "whitePieceCounter: " << whitePieceCounter << endl;
+
                 }
-                else if(piece.GetType() == "Black")
+                else if(piece.GetColor() == "Black")
                 {
-                    blackPieces.push_back(piece);
+                    findingBlackPieces.push_back(piece);
+                    blackPieceCounter++;
+                    cout << "blackPieceCounter: " << blackPieceCounter << endl;
                 }
                 //else: square is empty
             }
+            whitePieces = findingWhitePieces;
+            blackPieces = findingBlackPieces;
+            cout << "whitePieces length: " << whitePieces.size() << endl;
+            cout << "blackPieces length: " << blackPieces.size() << endl;
+            cout << "\n\n\n\n\n" << endl;
         }
         //starting the game
         string color;
-        cout << "What color would you like? (Black or White)";
+        cout << "What color would you like? (Black or White)" << endl;
         cin >> color;
-        while(color != "Black" & color != "White")
+        cout << "your color is " << color << endl;
+        while(color != "Black" && color != "White")
         {
-            cout << "Your chosen color wasn't 'Black' or 'White', please input one of those colors to continue";
+            cout << "Your chosen color wasn't 'Black' or 'White', please input one of those colors to continue ";
             cin >> color;
         }
 
@@ -2250,69 +2397,87 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             computerColor = "White";
         }
 
+        
         if(color == "White")
         {
+            cout << "for loop for White pieces has started" << endl;
             while(checkmate != true)//whitePlay
             {
                 string move;
-                cout << "What move would you like to play?";//should be in form (*Letter**Position**New Position)
+                cout << "What move would you like to play as white?    " << endl;//should be in form (*Letter**Position**New Position)
                 cin >> move;
                 do{
                     if(MoveWentThrough == false)
                     {
-                        cout << "Your previous move did not go through, please try again";
+                        cout << "Your previous move did not go through, please try again" << endl;
                         cin >> move;
                         cout << "\n";
                     }
+                    cout << "Move is about to run" << endl;
                     Move("White", move);
                 }while(MoveWentThrough == false);//once it's true, break the loop and let someone else play (will do the first time regardless)
-                cout << "\n";
+
+                cout << "Time for the computer to move";
                 //BlackMove (Computer)
-                Chess king;
-                for(int row = 0; row < 8; row++)
+                Chess king;//black's king
+                for(int rank = 0; rank < 8; rank++)
                 {
-                    for(Chess p : board[row])
+                    for(int file = 0; file < 8; file++)
                     {
-                        if(p.GetType() == "King" & p.GetColor() == computerColor)
+                        Chess p = board[rank][file];
+                        if(p.GetType() == "King" && p.GetColor() == computerColor)
                         {
                             king = p;
+                            cout << "Black's king has been found" << endl;
                         }
                     }
                 }
+
                 BlackMove(king, previousWhiteMoves);
             }
+            cout << "congratulations, you have bested me as white" << endl;
         }
         else//color == "Black"
         {
+            //WhiteMove (Computer)
+            cout << "Black for loop is starting" << endl;
             while(checkmate != true)//blackPlay
             {
-                //Human Play
-                list<string> possibleWhiteMoves = WhiteStartingMoves();
-                cout << "What move would you like to play?";//should be in form (*Letter**New Position)
-                string move; 
-                cin >> move;
-                do{
-                    if(MoveWentThrough == false)
-                    {
-                        cout << "Your previous move did not go through, please try again";
-                        cin >> move; 
-                    }
-                    Move("Black", move);
-                }while(MoveWentThrough == false);//once it's true, break the loop and let someone else play (will do the first time regardless)
-
-                //WhiteMove (Computer)
-                Chess king;
-                for(int row = 0; row < 8; row++)
+                Chess king;//white's king
+                for(int rank = 0; rank < 8; rank++)
                 {
-                    for(Chess p : board[row])
+                    for(int file = 0; file < 8; file++)
                     {
-                        if(p.GetType() == "King" & p.GetColor() == computerColor)
+                        Chess p = board[rank][file];
+                        if(p.GetType() == "King" && p.GetColor() == computerColor)
                         {
                             king = p;
+                            cout << "Black's king has been found" << endl;
                         }
                     }
                 }
+                cout << "White is about to move" << endl;
                 WhiteMove(king, previousBlackMoves);
+                
+                if(checkmate == false)
+                {
+                    //Human Play
+                    //list<string> possibleWhiteMoves = WhiteStartingMoves(); *Why is this here*
+                    cout << "What move would you like to play as black?" << endl;//should be in form (*Letter**New Position)
+                    string move; 
+                    cin >> move;
+                    do{
+                        if(MoveWentThrough == false)
+                        {
+                            cout << "Your previous move did not go through, please try again";
+                            cin >> move; 
+                        }
+                        cout << "Move is about to run" << endl;
+                        Move("Black", move);
+                    }while(MoveWentThrough == false);//once it's true, break the loop and let someone else play (will do the first time regardless)
+                }
+                
+                
             }
         }
 

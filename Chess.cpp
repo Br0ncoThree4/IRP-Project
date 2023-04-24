@@ -1,10 +1,11 @@
+using namespace std;
+
 #include <iostream>
 #include <string>
 #include <list>
-#ifndef NULL
-#define NULL 0
-#endif
-using namespace std;
+//#ifndef NULL
+//#define NULL 0
+//#endif
 
 
 class Chess
@@ -41,14 +42,12 @@ class Chess
 
 
 
-
-
 		Chess()//default constructor (empty square)
 			{
 				color = "NULL Color";
 				type = "NULL Type";
-				file;
-				rank;
+				file = -1; //-1 so that it doesnt interfere w the actual board
+				rank = -1; //-1 so that it doesnt interfere w the actual board
 			}
 
 		Chess(const Chess& piece)//copy constructor
@@ -69,13 +68,13 @@ class Chess
 		Chess(string loc) //Starting square constructor
 		{
 			
-			rank = stoi(loc.substr(1, 1));
+			rank = stoi(loc.substr(1, 1)) - 1;
 			file = ChangeLetterToNumber(loc.substr(0, 1));
 
-			if (rank == 1 || rank == 2) //White Starting ranks
+			if (rank == 0 || rank == 1) //White Starting ranks
 			{
 				color = "White";
-				if(rank == 2) {//Starting White Pawn rank (rank 2)
+				if(rank == 1) {//Starting White Pawn rank (rank 2)
 					type = "Pawn";
 					}
 				else if (loc == "a1" || loc == "h1") { //Starting White Rook positions
@@ -102,10 +101,10 @@ class Chess
 					cout << "Must be out of bounds, as the piece should be in ranks 1 and 2, but isn't in the selected range - probably due to file number";
 				}
 			}
-			else if (rank == 7 || rank == 8) //Black Starting ranks
+			else if (rank == 6 || rank == 7) //Black Starting ranks
 			{
 				color = "Black";
-				if (rank == 7) { //Starting Black Pawn rank (rank 7)
+				if (rank == 6) { //Starting Black Pawn rank (rank 7)
 					type = "Pawn";
 				}
 				else if (loc == "a8" || loc == "h8") { //Starting Black Rook positions
@@ -115,7 +114,7 @@ class Chess
 					type = "Knight";
 				}
 				else if (loc == "c8" || loc == "f8") {//Starting Black Bishop positions
-					type = "Knight";
+					type = "Bishop";
 				}
 				else if (loc == "d8") {//Starting Black Queen positions
 					type = "Queen";
@@ -132,7 +131,6 @@ class Chess
 					cout << "Must be out of bounds, as the piece should be in ranks 7 or 8, but isn't in the selected range - probably due to file number";
 				}
 			}
-
 			else {
 				cout << "The non-starting position inputted was " << loc;
 				color = "NULL Color";
@@ -145,13 +143,14 @@ class Chess
 	
 	static int ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 		string str = "abcdefgh";
-		return static_cast<int>(str.find_first_of(letter)) + 1;
+		return static_cast<int>(str.find_first_of(letter));
 	}
 
 	
 	//Getter methods
 
-	string GetColor() {
+	string GetColor() 
+	{
 		return color;
 	}
 	int GetFile() {
@@ -160,7 +159,8 @@ class Chess
 	int GetRank() {
 		return rank;
 	}
-	string GetType() {
+	string GetType() 
+	{
 		return type;
 	}
 
@@ -231,20 +231,4 @@ class Chess
 		}
 	}
 	 */
-
-	/// @brief 
-	/// @param piece 
-	/// @param cPiece 
-	/// @return 
-	friend std::ostream& operator == (Chess piece, Chess& cPiece)
-	{
-		if(piece.GetColor() == cPiece.GetColor() && piece.GetType() == cPiece.GetType() && piece.GetFile() == cPiece.GetFile() && piece.GetRank() == cPiece.GetRank())
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
 };
