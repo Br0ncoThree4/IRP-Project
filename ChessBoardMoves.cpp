@@ -560,8 +560,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         int kingRank;
         for(int row = 0; row < 8; row++)
         {
-            for(Chess possibleKing : board[row])
+            for(int col = 0; col < 8; col++)
             {
+                Chess possibleKing = board[row][col];
                 if(possibleKing.GetType() == "King" && possibleKing.GetColor() == piece.GetColor())//piece is the correct king
                 {
                     kingFile = possibleKing.GetFile();
@@ -1786,12 +1787,17 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         {
             piecesOfColor = whitePieces;
         }
-
-        for(Chess piece: piecesOfColor)
+        
+        list<Chess> tempPiecesOfColor = piecesOfColor;
+        for(int counter = 0; counter < piecesOfColor.size(); counter++)
         {
+            Chess piece = tempPiecesOfColor.front();
+            tempPiecesOfColor.pop_front();
             list<string> moves = FindMoves(piece);
-            for(string move : moves)
+            for(int num = 0; num < moves.size(); num++)
             {
+                string move = moves.front();
+                moves.pop_front();
                 coveredSquares.push_back(move);
             }
         }
@@ -1801,7 +1807,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
     bool SameFile(string move, string file)
     {
-    return (file == move.substr(3, 1));
+        return (file == move.substr(3, 1));
     }
 
     bool SameRank(string move, int rank)
@@ -1828,8 +1834,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             piecesOfOtherColor = whitePieces;
         }
 
-        for(Chess piece : piecesOfColor)//find king and its location
+        //find king and its location
+         list<Chess> tempPiecesOfColor = piecesOfColor;
+        for(int counter = 0; counter < piecesOfColor.size(); counter++)
         {
+            Chess piece = tempPiecesOfColor.front();
+            tempPiecesOfColor.pop_front();
             if(piece.GetType() == "King")
             {
                 king = piece;
@@ -2519,8 +2529,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         list<Chess> findingBlackPieces;
         for(int row = 0; row < 8; row++)
         {
-            for(Chess piece : board[row])
+            for(int col = 0; col < 8; col++)
             {
+                Chess piece = board[row][col];
                 cout << piece.GetColor() << " " << piece.GetType() << endl;
                 if(piece.GetColor() == "White")
                 {
@@ -2542,7 +2553,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             blackPieces = findingBlackPieces;
             cout << "whitePieces length: " << whitePieces.size() << endl;
             cout << "blackPieces length: " << blackPieces.size() << endl;
-            cout << "\n\n\n\n\n" << endl;
+            cout << "\n\n\n" << endl;
         }
         //starting the game
         string color;
