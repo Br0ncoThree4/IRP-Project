@@ -4,6 +4,7 @@ using namespace std;
 #include <list>
 #include "Chess.cpp"
 #include <array>
+#include <cstdlib>//includes rand() method
 #ifndef NULL
 #define NULL 0
 #endif
@@ -301,8 +302,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         else if(color == "White")
         {
             list<Chess> pieces;
-            for(Chess piece : whitePieces)
+            list<Chess> tempPieces = whitePieces;
+            int length = whitePieces.size();
+            for(int counter = 0; counter < length; counter++)
             {
+                Chess piece = tempPieces.front();
+                tempPieces.pop_front();
                 if(piece.GetType().substr(0, 1) == type || (piece.GetType() == "Knight" && type == "N"))
                 {
                     pieces.push_back(piece);
@@ -362,8 +367,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         else//color == black
         {
             list<Chess> pieces;
-            for(Chess piece : blackPieces)
+            list<Chess> tempPieces = whitePieces;
+            int length = whitePieces.size();
+            for(int counter = 0; counter < length; counter++)
             {
+                Chess piece = tempPieces.front();
+                tempPieces.pop_front();
                 if(piece.GetType().substr(0, 1) == type || (piece.GetType() == "Knight" && type == "N"))
                 {
                     pieces.push_back(piece);
@@ -422,10 +431,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     }
                 }
             }
+            cout << "Black piece found at rank = " << piece.GetRank() << " and file = " << piece.GetFile() << endl;
         }
 
         //make sure piece isn't pinned
-        string block = IsBlockingCheck(piece);//stores piece type and location (such as Ke1) or ""
+        string block = IsBlockingCheck(piece);//stores piece type and location (such as Qd1) or ""
         if(block != "")
         {
             cout << "This piece is blocking check from " + block + ", so it can't move";
@@ -482,6 +492,8 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             board[newRank][newFile] = piece;
             
             piece.SetPosition(newPosition);//set position for the piece's instance variables 
+
+            cout << "New Position of piece: " << alphabet.substr(piece.GetFile(), 1) << (piece.GetRank() + 1) << endl;
             if(color == "White")
             {
                 whitePieces.push_back(piece);
@@ -1503,7 +1515,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank + 2, currentFile) && board[currentRank + 2][currentFile].GetColor() == defaultChess.GetColor())
+            if(IsOnBoard(currentRank + 2, currentFile) && board[currentRank + 2][currentFile].GetColor() == defaultChess.GetColor() && currentRank == 1)
             {
                 string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 2 + 1);
                 possibleMoves.push_back(position);
@@ -1526,7 +1538,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank - 2, currentFile) && board[currentRank - 2][currentFile].GetColor() == defaultChess.GetColor())
+            if(IsOnBoard(currentRank - 2, currentFile) && board[currentRank - 2][currentFile].GetColor() == defaultChess.GetColor() && currentRank == 6)
             {
                 string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 2 + 1);
                 possibleMoves.push_back(position);
@@ -2232,7 +2244,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
         cout << "The king is not in check" << endl;
         //will only get here if the king isn't in check (list has had no change, so possibleMoves = the legal moves)
-        cout << possibleMoves.size() << endl;
+        cout << "possibleMoves.size(): " << possibleMoves.size() << endl;
         return possibleMoves;
     }
 
@@ -2245,10 +2257,10 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
     {
         cout << "WhiteMove has started" << endl;
         string whiteMove;
-        cout << previousWhiteMoves.size() << endl;
+        cout << "old previousWhiteMoves.size(): " << previousWhiteMoves.size() << endl;
         cout << "TotalPossibleMoves('White').size() "  << TotalPossibleMoves("White").size() << endl;
-        previousWhiteMoves = TotalLegalMoves("White", TotalPossibleMoves("White"));//gets legal moves & changes
-        cout << previousWhiteMoves.size() << endl;
+        previousWhiteMoves = TotalLegalMoves("White", TotalPossibleMoves("White"));//gets legal moves
+        cout << "new previousWhiteMoves.size(): " << previousWhiteMoves.size() << endl;
         list<string> whitePossibleMoves = previousWhiteMoves;
         for(string move : whitePossibleMoves)
         {
@@ -2263,6 +2275,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             whitePossibleMoves = movesOutOfCheck("White", whitePossibleMoves);
             cout << "The king is in check" << endl;
         }
+        cout << endl;
 
 
         cout << "The algorithm is starting" << endl;
@@ -2276,12 +2289,13 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             cout << "CHECKMATE, Black wins" << endl;
             return "CHECKMATE, Black wins";
         }
-        for(string move : whitePossibleMoves)
+        for(string move : whitePossibleMoves)//algorithm
         {
             if(currentIndex = moveIndex)
             {
                 currentIndex++;
                 whiteMove = move;
+                cout << "whiteMove is " << whiteMove << endl;
                 break;
             }
             else
@@ -2300,9 +2314,10 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
     {
         cout << "BlackMove has started" << endl;
         string blackMove;
-        cout << previousBlackMoves.size() << endl;
+        cout << "old previousBlackMoves.size(): " << previousBlackMoves.size() << endl;
         cout << "TotalPossibleMoves('Black').size() "  << TotalPossibleMoves("Black").size() << endl;
         previousBlackMoves = TotalLegalMoves("Black",TotalPossibleMoves("Black"));//gets legal moves
+        cout << "new previousBlackMoves.size(): " << previousBlackMoves.size() << endl;
         list<string> blackPossibleMoves = previousBlackMoves;
         for(string move : blackPossibleMoves)
         {
@@ -2310,10 +2325,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         }
         cout << endl;
         bool kingIsInCheck = IsInCheck(king, whitePossibleMoves);
+        cout << "kingIsInCheck: " << kingIsInCheck << endl;
         cout << "The variables have been initialized" << endl;
         if(kingIsInCheck)
         {
             blackPossibleMoves = movesOutOfCheck("Black", blackPossibleMoves);
+            previousBlackMoves = blackPossibleMoves;
         }
 
         cout << "The algorithm is starting" << endl;
@@ -2329,7 +2346,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         {
             if(currentIndex = moveIndex)
             {
+                currentIndex++;
                 blackMove = move;
+                cout << "blackMove is " << blackMove << endl;
                 break;
             }
             else

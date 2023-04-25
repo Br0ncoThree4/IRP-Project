@@ -9,7 +9,7 @@
             "type": "cppdbg",//idk what this is/means
             "request": "launch",//idk what this is either
             "cwd": "${workspaceFolder}",
-            "program": "C:/Users/andre/Desktop/GitHub/IRP-Project/a.exe",//"C:/Users/andre/OneDrive/Desktop/IRP-Project/Tester.exe",
+            "program": "C:/Users/andre/OneDrive/Desktop/IRP-Project/a.exe",//"C:/Users/andre/Desktop/GitHub/IRP-Project/a.exe",
             "args": [],
             "stopAtEntry": false,
             "environment": [],
