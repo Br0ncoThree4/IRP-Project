@@ -1060,7 +1060,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank + counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is occupied by same color piece
                 {
@@ -1081,7 +1088,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank - counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1102,7 +1116,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank - counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1123,7 +1144,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank + counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1145,7 +1173,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank + counter][currentFile].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1166,7 +1201,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank - counter][currentFile].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1187,7 +1229,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1208,7 +1257,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1238,6 +1294,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 			return possibleMoves;
 		}
 
+        //bishop moves
         int counter = 1;
         do{
             if(IsOnBoard(currentRank + counter, currentFile + counter))
@@ -1246,7 +1303,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank + counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is occupied by same color piece
                 {
@@ -1267,7 +1331,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank - counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1288,7 +1359,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank - counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1309,7 +1387,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank + counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1405,7 +1490,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank + counter][currentFile].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1426,7 +1518,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank - counter][currentFile].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1447,7 +1546,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
@@ -1468,7 +1574,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    counter++;
+                    if(board[currentRank][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    {
+                        counter++;
+                    }
+                    else//"position" is taking the a piece
+                    {
+                        counter = 8;
+                    }
                 }
                 else//square is the same color
                 {
