@@ -194,7 +194,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         if(move.find("x") != -1)//if the x exists in the move
         {
             move = move.substr(0, move.find("x")) + move.substr(move.find("x"), 2);
-            if(color == "White")
+            if(color == "Black")
             {
                 int length = blackPieces.size();
                 list<Chess> tempPieceArray = blackPieces;
@@ -285,15 +285,23 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         else if(move == "PIECELIST")
         {
             cout << "WHITE PIECE LIST";
-            for(Chess piece : whitePieces)
+            int whiteLength = whitePieces.size();
+            list<Chess> whiteTempList = whitePieces;
+            for(int counter = 0; counter < whiteLength; counter++)
             {
+                Chess piece = whiteTempList.front();
+                whiteTempList.pop_front();
                 cout << "White " << piece.GetType() + " " << piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " + piece.GetRank() << " ";
             }
             cout << "endl";
 
             cout << "BLACK PIECE LIST";
-            for(Chess piece : blackPieces)
+            int blackLength = blackPieces.size();
+            list<Chess> blackTempList = blackPieces;
+            for(int counter = 0; counter < blackLength; counter++)
             {
+                Chess piece = blackTempList.front();
+                blackTempList.pop_front();
                 cout << "Black " << piece.GetType() << " " + piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " << piece.GetRank() + " ";
             }
         }
@@ -317,12 +325,15 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             if(pieces.size() == 1)
             {
                 piece = pieces.front();
-                newPosition = move.substr(move.length() - 2, 2);
             }
             else
             {
-                for(Chess possiblePiece : pieces)
+                int length = pieces.size();
+                list<Chess> tempPieces = pieces;
+                for(int counter = 0; counter < length; counter++)
                 {
+                    Chess possiblePiece = tempPieces.front();
+                    tempPieces.pop_front();
                     if(move.length() == 3)//Re1 (can't use anything to find location)
                     {
                         list<string> possibleMoves = FindMoves(possiblePiece);
@@ -330,7 +341,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                         {
                             if(possibleMove == move.substr(1, 2))//if possibleMove = the move
                             {
-                                //piece = possiblePiece;
+                                piece = possiblePiece;
                             }
                         }
                     }
@@ -367,8 +378,8 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         else//color == black
         {
             list<Chess> pieces;
-            list<Chess> tempPieces = whitePieces;
-            int length = whitePieces.size();
+            list<Chess> tempPieces = blackPieces;
+            int length = blackPieces.size();
             for(int counter = 0; counter < length; counter++)
             {
                 Chess piece = tempPieces.front();
@@ -385,53 +396,58 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             }
             else
             {
-                list<Chess> tempPieces = pieces;
-                int length = pieces.size();
-                for(int counter = 0; counter < length; counter++)
+                if(move.length() == 5)//Re1e2
                 {
-                    Chess possiblePiece = tempPieces.front();
-                    tempPieces.pop_front();
-                    if(move.length() == 3)//Re1 (can't use anything to find location)
+                    int rank = stoi(move.substr(2, 1));
+                    int file = alphabet.find(move.substr(1, 1));
+                    piece = board[rank - 1][file];
+                    cout << "rank is " << rank << ", file is " << file << ", the piece is a " << piece.GetColor() << " " << piece.GetType() << endl;
+                }
+                else
+                {
+                    list<Chess> tempPieces = pieces;
+                    int length = pieces.size();
+                    for(int counter = 0; counter < length; counter++)
                     {
-                        list<string> possibleMoves = FindMoves(possiblePiece);
-                        for(string possibleMove : possibleMoves)
+                        Chess possiblePiece = tempPieces.front();
+                        tempPieces.pop_front();
+                        if(move.length() == 3)//Re1 (can't use anything to find location)
                         {
-                            if(possibleMove == move.substr(1, 2))//if possibleMove = the move
+                            list<string> possibleMoves = FindMoves(possiblePiece);
+                            for(string possibleMove : possibleMoves)
                             {
-                                //piece = possiblePiece;
+                                if(possibleMove == move.substr(1, 2))//if possibleMove = the move
+                                {
+                                    piece = possiblePiece;
+                                }
                             }
                         }
-                    }
-                    else if(move.length() == 4)//Ree1 or R1e1
-                    {
-                        int file;
-                        int rank;
-                        if(alphabet.find(move.substr(1, 1)) == -1)//second character isn't a file (second character is a rank number)
+                        else if(move.length() == 4)//Ree1 or R1e1
                         {
-                            rank = stoi(move.substr(1, 1));
-                            if(possiblePiece.GetRank() == rank)
+                            int file;
+                            int rank;
+                            if(alphabet.find(move.substr(1, 1)) == -1)//second character isn't a file (second character is a rank number)
                             {
-                                //piece = possiblePiece;
+                                rank = stoi(move.substr(1, 1)) - 1;
+                                if(possiblePiece.GetRank() == rank)
+                                {
+                                    //piece = possiblePiece;
+                                }
                             }
+                            else//second character is a letter (second character is a file letter)
+                            {
+                                file = alphabet.find(move.substr(1, 1));
+                                if(possiblePiece.GetFile() == file)
+                                {
+                                    //piece = possiblePiece;
+                                }
+                            }   
                         }
-                        else//second character is a letter (second character is a file letter)
-                        {
-                            file = alphabet.find(move.substr(1, 1));
-                            if(possiblePiece.GetFile() == file)
-                            {
-                               //piece = possiblePiece;
-                            }
-                        }   
-                    }
-                    else if(move.length() == 5)//Re1e2
-                    {
-                        int rank = stoi(move.substr(2, 1));
-                        int file = alphabet.find(move.substr(1, 1));
-                        piece = board[rank][file];
                     }
                 }
             }
-            cout << "Black piece found at rank = " << piece.GetRank() << " and file = " << piece.GetFile() << endl;
+            //cout << piece.GetColor() << " piece found at rank = " << piece.GetRank() << " and file = " << piece.GetFile() << endl;
+            cout << piece.GetColor() << " " << piece.GetType() << " found at rank " << piece.GetRank() << " and file " << piece.GetFile() << endl;
         }
 
         //make sure piece isn't pinned
@@ -443,11 +459,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         else//if not pinned, we can move it
         {
 		    cout << "This piece is not blocking a check" << endl;
-            int newRank = stoi(newPosition.substr(1, 1)) + 1;
-		    int newFile = ChangeLetterToNumber(newPosition.substr(0, 1));
+            int newRank = stoi(newPosition.substr(1, 1)) - 1;//ranks 1-8 converted to ranks 0-7
+		    int newFile = alphabet.find(newPosition.substr(0, 1));
 
             //move the piece
-            cout << "the piece was moved from " << alphabet.substr(piece.GetFile(), 1) << (piece.GetRank() + 1) << " to " << alphabet.substr(newFile, 1) << newRank << endl;
+            cout << "the piece was moved from " << alphabet.substr(piece.GetFile(), 1) << (piece.GetRank() + 1) << " to " << alphabet.substr(newFile, 1) << (newRank + 1) << endl;
             
             if(color == "White")
             {
@@ -472,7 +488,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 //blackPieces.remove(piece);
                 int length = blackPieces.size();
-                cout << "New length: " << length << endl;
+                cout << "Old length: " << length << endl;
                 list<Chess> tempPieces = blackPieces;
                 list<Chess> newPieces;
                 for(int counter = 0; counter < length; counter++)
@@ -498,11 +514,29 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 whitePieces.push_back(piece);
                 cout << "Newer Length: " << whitePieces.size() << endl;
+                list<Chess> tempPieces = whitePieces;
+                cout << "whitePieces" << endl;
+                for(int counter = 0; counter < whitePieces.size(); counter++)
+                {
+                    Chess tempPiece = tempPieces.front();
+                    tempPieces.pop_front();
+                    cout << tempPiece.GetColor() << " " << tempPiece.GetType() << " " << alphabet.substr(tempPiece.GetFile(), 1) << tempPiece.GetRank() + 1 << "\t";
+                }
+                cout << endl;
             }
             else
             {
                 blackPieces.push_back(piece);
                 cout << "Newer Length: " << blackPieces.size() << endl;
+                list<Chess> tempPieces = blackPieces;
+                cout << "blackPieces" << endl;
+                for(int counter = 0; counter < blackPieces.size(); counter++)
+                {
+                    Chess tempPiece = tempPieces.front();
+                    tempPieces.pop_front();
+                    cout << tempPiece.GetColor() << " " << tempPiece.GetType() << " " << alphabet.substr(tempPiece.GetFile(), 1) << tempPiece.GetRank() + 1 << "\t";
+                }
+                cout << endl;
             }
         }
     }
@@ -2356,6 +2390,8 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 currentIndex++;
             }
         }
+        cout << "blackMove is about to get played" << endl;
+        Move("Black", blackMove);
 
         cout << "I (the computer) played " << blackMove << endl;
         return blackMove;
