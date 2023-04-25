@@ -17,7 +17,7 @@ class Tester : public ChessBoardMoves
 //want to play chess here, import all other files and game
     int main()
     {
-        /*
+        
         std::cout.flush();
         std::cout << "running 1 .." << std::endl;
         
@@ -28,7 +28,7 @@ class Tester : public ChessBoardMoves
         ChessBoardMoves board;
         board = ChessBoardMoves(pieceList);//sets up board w starting pieces
         board.NormalPlay();
-        */
+        
         
         
 

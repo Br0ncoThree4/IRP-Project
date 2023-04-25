@@ -169,7 +169,7 @@ class Chess
 	//Changing the position
 	void SetPosition(string newPosition) {
 		this->file = ChangeLetterToNumber(newPosition.substr(0, 1));
-		this->rank = stoi(newPosition.substr(1, 1));
+		this->rank = stoi(newPosition.substr(1, 1)) - 1;
 	}
 
 	//Creating basic board
