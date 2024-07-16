@@ -5,6 +5,8 @@ using namespace std;
 #include "Chess.cpp"
 #include <array>
 #include <cstdlib>//includes rand() method
+#include unordered_map
+#include "basic.h"
 #ifndef NULL
 #define NULL 0
 #endif
@@ -183,9 +185,10 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         }
 	}
 
-    void Move(string color, string move)
+    void Move(chessColor color, string move)
     {
-        string type = move.substr(0, 1);
+        chessType type;
+        unordered_map <char, chessType> moveToType = {'N':Knight, 'K'}
         int newRank;
         int newFile;
         Chess piece;
@@ -2047,7 +2050,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     }
                 }
 
-                else if(checkingPiece.GetType() == "Queen")//find out whether it's diagonal or line check, do rook or bishop checks
+                else if(checkingPiece.GetType() == Queen)//find out whether it's diagonal or line check, do rook or bishop checks
                 {
                     
                     //rook ones
@@ -2232,7 +2235,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     }
                 }
 
-                else if(checkingPiece.GetType() == "Knight")//piece must be taken or king move out of the way
+                else if(checkingPiece.GetType() == Knight)//piece must be taken or king move out of the way
                 {
                     if(move.substr(0, 1) == "K")//king: must move out of way of knight
                     {
@@ -2278,7 +2281,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
 	void LegalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
 	{
-		string type = piece.GetType();
+		chessType type = piece.GetType();
 		list<string> possibleMoves;
 		//Finding list of legal moves, depending on each piece
 		possibleMoves = FindMoves(piece);

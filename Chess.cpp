@@ -1,20 +1,18 @@
 using namespace std;
 
 #include <iostream>
-#include <string>
-#include <list>
+#include "Chess.h"
+#include "basic.cpp"
 //#ifndef NULL
 //#define NULL 0
 //#endif
 
-
 class Chess
 {
 	private:
-		string color;
-		string type;
-		int file;
-		int rank;
+		enum chessColor _color;
+		enum chessType _type;
+		Position _pos;
 		
 		//checkKingMoves(Chess);
 		//checkRookMoves(Chess);
@@ -42,101 +40,91 @@ class Chess
 
 
 
-		Chess()//default constructor (empty square)
-			{
-				color = "NULL Color";
-				type = "NULL Type";
-				file = -1; //-1 so that it doesnt interfere w the actual board
-				rank = -1; //-1 so that it doesnt interfere w the actual board
-			}
-
-		Chess(const Chess& piece)//copy constructor
+		Chess::Chess()//default constructor (empty square)
+		: _pos('z', -1)//, _color(-1), _type(-1) 
 		{
-			color = piece.color;
-			type = piece.type;
-			file = piece.file;
-			rank = piece.rank;
+			_color = NO_COLOR;
+			_type = NO_TYPE;
 		}
 
-		Chess(string c, string t, string f, int r) //parameterized constructor
+		Chess::Chess(const Chess& piece)//copy constructor
+		: _pos(piece._pos), _color(piece._color), _type(piece._type) {}
+
+		Chess::Chess(chessColor c, chessType t, char f, int r) //parameterized constructor
+		: _color(c), _type(t), _pos(f, r) {}
+
+		Chess::Chess(string loc) //Starting square constructor
+		: _pos(loc[0], loc[1] - '0') //second argument should return an int that is the correct number of the rank
 		{
-			color = c;
-			type = t;
-			file = ChangeLetterToNumber(f);
-			rank = r;
-		}
-		Chess(string loc) //Starting square constructor
-		{
+			//if(loc.length() != 2) {cout << "the location is not 2 characters (file letter and rank number), so this doesn't work"; throw std::runtime_error("Chess(string loc) string error");}
+				//this check got thrown out, could bring back using default Position constructor
 			
-			rank = stoi(loc.substr(1, 1)) - 1;
-			file = ChangeLetterToNumber(loc.substr(0, 1));
-
-			if (rank == 0 || rank == 1) //White Starting ranks
+			if (_pos.rank == 0 || _pos.rank == 1) //White Starting ranks
 			{
-				color = "White";
-				if(rank == 1) {//Starting White Pawn rank (rank 2)
-					type = "Pawn";
+				_color = White;
+				if(_pos.rank == 1) {//Starting White Pawn rank (rank 2)
+					_type = Pawn;
 					}
 				else if (loc == "a1" || loc == "h1") { //Starting White Rook positions
-					type = "Rook";
+					_type = Rook;
 					}
 				else if (loc == "b1" || loc == "g1") {//Starting White Knight positions
-					type = "Knight";
+					_type = Knight;
 					}
 				else if (loc == "c1" || loc == "f1") {//Starting White Bishop positions
-					type = "Bishop";
+					_type = Bishop;
 					}
 				else if (loc == "d1") {//Starting White Queen position
-					type = "Queen";
+					_type = Queen;
 					}
 				else if (loc == "e1") {//Starting White King position
-					type = "King";
+					_type = King;
 					}
 				else {
 					cout << "The non-starting position inputted was" << loc;
-					color = "NULL Color";
-					type = "NULL Type";
-					file = -1;
-					rank = -1;
+					_color = -1;
+					_type = -1;
+					_pos = Position('z', -1);
 					cout << "Must be out of bounds, as the piece should be in ranks 1 and 2, but isn't in the selected range - probably due to file number";
+					cout << "Position check is " << _pos << endl; //pretty sure this inclusion of the Position will return a bool
 				}
 			}
-			else if (rank == 6 || rank == 7) //Black Starting ranks
+			else if (_pos.rank == 6 || _pos.rank == 7) //Black Starting ranks
 			{
-				color = "Black";
-				if (rank == 6) { //Starting Black Pawn rank (rank 7)
-					type = "Pawn";
+				_color = Black;
+				if (_pos.rank == 6) { //Starting Black Pawn rank (rank 7)
+					_type = Pawn;
 				}
 				else if (loc == "a8" || loc == "h8") { //Starting Black Rook positions
-					type = "Rook";
+					_type = Rook;
 				}
 				else if (loc == "b8" || loc == "g8") {//Starting Black Knight positions
-					type = "Knight";
+					_type = Knight;
 				}
 				else if (loc == "c8" || loc == "f8") {//Starting Black Bishop positions
-					type = "Bishop";
+					_type = Bishop;
 				}
 				else if (loc == "d8") {//Starting Black Queen positions
-					type = "Queen";
+					_type = Queen;
 				}
 				else if (loc == "e8") {//Starting Black King positions
-					type = "King";
+					_type = King;
 				}
 				else {
 					cout << "The non-starting position inputted was " << loc;
-					color = "NULL Color";
-					type = "NULL Type";
-					file = -1;
-					rank = -1;
+					_color = NO_COLOR;
+					_type = NO_TYPE;
+					_pos = Position('z', -1);
 					cout << "Must be out of bounds, as the piece should be in ranks 7 or 8, but isn't in the selected range - probably due to file number";
+					cout << "Position check is " << _pos << endl; //pretty sure this inclusion of the Position will return a bool
 				}
 			}
 			else {
 				cout << "The non-starting position inputted was " << loc;
-				color = "NULL Color";
-				type = "NULL Type";
-				file = -1;
-				rank = -1;
+				_color = NO_COLOR;
+				_type = NO_TYPE;
+				_pos = Position('z', -1);
+				cout << "Position check is " << _pos << endl; //pretty sure this inclusion of the Position will return a bool
 			}
 		}
 	
@@ -149,27 +137,27 @@ class Chess
 	
 	//Getter methods
 
-	string GetColor() 
+	chessColor GetColor() 
 	{
-		return color;
+		return _color;
 	}
 	int GetFile() {
-		return file;
+		return _pos.file;
 	}
-	int GetRank() {
-		return rank;
+	char GetRank() {
+		return _pos.rank;
 	}
-	string GetType() 
+	chessType GetType() 
 	{
-		return type;
+		return _type;
 	}
 
 	
 
 	//Changing the position
 	void SetPosition(string newPosition) {
-		this->file = ChangeLetterToNumber(newPosition.substr(0, 1));
-		this->rank = stoi(newPosition.substr(1, 1)) - 1;
+		this->_pos.file = newPosition[0];
+		this->_pos.rank = newPosition[1] - '0';
 	}
 
 	//Creating basic board
