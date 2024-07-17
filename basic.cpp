@@ -18,18 +18,27 @@ class Position
 
 class globalFunctions
 {
-    void breakDownMove(std::string move, Position& pos, chessType& type, chessColor color)
+
+
+    void breakDownMove(std::string move, Position& pos, globalEnums::chessType& type, globalEnums::chessColor color)
     {
         char t = move[0];
         if(t < 'A') //If the char is a number, then it would be less than 'A', and therefore the type is a pawn
         {
-            type = chessType::Pawn;
+            type = globalEnums::chessType::Pawn;
         }
         else
         {
-            type = charToChessType[t];
+            type = charToChessType[t]; //charToChessType is equal to moveToType
         }
 
         Position newPosition()
     }
+
+    std::unordered_map <char, globalEnums::chessType> moveToType = {{'N' , globalEnums::Knight}, 
+                {'B' , globalEnums::Bishop}, 
+                {'R' , globalEnums::Rook}, 
+                {'Q' , globalEnums::Queen}, 
+                {'K' , globalEnums::King}, 
+                {' ' , globalEnums::Pawn}};
 };

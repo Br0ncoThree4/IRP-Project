@@ -5,7 +5,7 @@ using namespace std;
 #include "Chess.cpp"
 #include <array>
 #include <cstdlib>//includes rand() method
-#include unordered_map
+#include <unordered_map>
 #include "basic.h"
 #ifndef NULL
 #define NULL 0
@@ -82,11 +82,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             int file = piece.GetFile();
             board[rank][file] = piece;
             totalPieces.push_back(piece);
-            if(piece.GetColor() == "White")
+            if(piece.GetColor() == globalEnums::White)
             {
                 whitePieces.push_back(piece);
             }
-            else if(piece.GetColor() == "Black")
+            else if(piece.GetColor() == globalEnums::Black)
             {
                 blackPieces.push_back(piece);
             }
@@ -185,10 +185,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         }
 	}
 
-    void Move(chessColor color, string move)
+    void Move(globalEnums::chessColor color, string move)
     {
-        chessType type;
-        unordered_map <char, chessType> moveToType = {'N':Knight, 'K'}
+        globalEnums::chessType type;
+        
+
         int newRank;
         int newFile;
         Chess piece;
@@ -197,7 +198,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         if(move.find("x") != -1)//if the x exists in the move
         {
             move = move.substr(0, move.find("x")) + move.substr(move.find("x"), 2);
-            if(color == "Black")
+            if(color == globalEnums::Black)
             {
                 int length = blackPieces.size();
                 list<Chess> tempPieceArray = blackPieces;
@@ -217,7 +218,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 }
                 blackPieces = goodPieces;
             }
-            else if(color == "White")//just in case another color comes through
+            else if(color == globalEnums::White)//just in case another color comes through
             {
                 int length = whitePieces.size();
                 list<Chess> tempPieceArray = whitePieces;
@@ -310,7 +311,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         }
 
         //need to find piece that is gonna be moved (if it's a normal move)
-        else if(color == "White")
+        else if(color == globalEnums::White)
         {
             list<Chess> pieces;
             list<Chess> tempPieces = whitePieces;
@@ -319,7 +320,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 Chess piece = tempPieces.front();
                 tempPieces.pop_front();
-                if(piece.GetType().substr(0, 1) == type || (piece.GetType() == "Knight" && type == "N"))
+                if(piece.GetType() == type || (piece.GetType() == globalEnums::Knight && type == globalEnums::Knight))
                 {
                     pieces.push_back(piece);
                     cout << piece.GetColor() << " " << piece.GetType() << endl;
@@ -387,7 +388,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 Chess piece = tempPieces.front();
                 tempPieces.pop_front();
-                if(piece.GetType().substr(0, 1) == type || (piece.GetType() == "Knight" && type == "N"))
+                if(piece.GetType() == type || (piece.GetType() == globalEnums::Knight && type == globalEnums::Knight))
                 {
                     pieces.push_back(piece);
                     cout << piece.GetColor() << " " << piece.GetType() << endl;
@@ -468,7 +469,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             //move the piece
             cout << "the piece was moved from " << alphabet.substr(piece.GetFile(), 1) << (piece.GetRank() + 1) << " to " << alphabet.substr(newFile, 1) << (newRank + 1) << endl;
             
-            if(color == "White")
+            if(color == globalEnums::White)
             {
                 //whitePieces.remove(piece);
                 int length = whitePieces.size();
@@ -513,7 +514,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             piece.SetPosition(newPosition);//set position for the piece's instance variables 
 
             cout << "New Position of piece: " << alphabet.substr(piece.GetFile(), 1) << (piece.GetRank() + 1) << endl;
-            if(color == "White")
+            if(color == globalEnums::White)
             {
                 whitePieces.push_back(piece);
                 cout << "Newer Length: " << whitePieces.size() << endl;
@@ -566,7 +567,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             for(int col = 0; col < 8; col++)
             {
                 Chess possibleKing = board[row][col];
-                if(possibleKing.GetType() == "King" && possibleKing.GetColor() == piece.GetColor())//piece is the correct king
+                if(possibleKing.GetType() == globalEnums::King && possibleKing.GetColor() == piece.GetColor())//piece is the correct king
                 {
                     kingFile = possibleKing.GetFile();
                     kingRank = possibleKing.GetRank();
@@ -586,7 +587,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(isToRightAndAbove)//king is to the right of current piece
                 {
                     checkToLeftAndBelow = true;
-                    if(board[kingRank - diff][kingFile - diff].GetColor() == "White" || board[kingRank - diff][kingFile - diff].GetColor() == "Black")
+                    if(board[kingRank - diff][kingFile - diff].GetColor() == globalEnums::White || board[kingRank - diff][kingFile - diff].GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -594,7 +595,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the left of current piece
                 {
                     checkToLeftAndBelow = false;//check to the right of currentPiece
-                    if(board[kingRank + diff][kingFile + diff].GetColor() == "White" || board[kingRank + diff][kingFile + diff].GetColor() == "Black")
+                    if(board[kingRank + diff][kingFile + diff].GetColor() == globalEnums::White || board[kingRank + diff][kingFile + diff].GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -621,7 +622,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Bishop")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Bishop)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -655,7 +656,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Bishop")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Bishop)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -684,7 +685,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(kingToLeftAndAbove)//king is to the left (and above) the current piece
                 {
                     checkToRightAndBelow = true;
-                    if(board[kingFile - diff][kingRank + diff].GetColor() == "White" || board[kingFile - diff][kingRank + diff].GetColor() == "Black")
+                    if(board[kingFile - diff][kingRank + diff].GetColor() == globalEnums::White || board[kingFile - diff][kingRank + diff].GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -692,7 +693,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the right (and below) the current piece
                 {
                     checkToRightAndBelow = false;
-                    if(board[kingFile + diff][kingRank - diff].GetColor() == "White" || board[kingFile + diff][kingRank - diff].GetColor() == "Black")
+                    if(board[kingFile + diff][kingRank - diff].GetColor() == globalEnums::White || board[kingFile + diff][kingRank - diff].GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -719,7 +720,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Bishop")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Bishop)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -753,7 +754,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Rook)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -791,7 +792,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is below the currentPiece
                 {
                     belowCheck = false;
-                    if(board[kingFile][currentRank + diff].GetColor() == "White" || board[kingFile][currentRank + diff].GetColor() == "Black")
+                    if(board[kingFile][currentRank + diff].GetColor() == globalEnums::White || board[kingFile][currentRank + diff].GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -819,7 +820,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Rook)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -853,7 +854,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Rook)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -882,7 +883,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(kingToRight)//king is to the right of the currentPiece
                 {
                     leftCheck = true;
-                    if(board[kingFile - diff][kingRank].GetColor() == "White" || board[kingFile - diff][kingRank].GetColor() == "Black")
+                    if(board[kingFile - diff][kingRank].GetColor() == globalEnums::White || board[kingFile - diff][kingRank].GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -890,7 +891,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the left of the currentPiece
                 {
                     leftCheck = false;
-                    if(board[kingFile + diff][kingRank].GetColor() == "White" || board[kingFile + diff][kingRank].GetColor() == "Black")
+                    if(board[kingFile + diff][kingRank].GetColor() == globalEnums::White || board[kingFile + diff][kingRank].GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -917,7 +918,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Rook)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -951,7 +952,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == "Queen" || possibleBlocker.GetType() == "Rook")
+                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Rook)
                                 {
                                     pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
                                     return pieceGettingBlocked; //returns piece type and location (Ke1)
@@ -1024,7 +1025,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "K";
 
-		if("King" != piece.GetType())
+		if(globalEnums::King != piece.GetType())
 		{
 			cout << "Your piece is a " << piece.GetType() << ", not a King, as was expected by the checkKingMoves method";
 			return possibleMoves;
@@ -1081,9 +1082,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
-		string type = "Q";
+		globalEnums::chessType type = globalEnums::Queen;
 
-		if(type != piece.GetType().substr(0,1))
+		if(type != piece.GetType())
 		{
 			cout << "Your piece is a " << piece.GetType() << ", not a Queen, as was expected by the checkQueenMoves method";
 			return possibleMoves;
@@ -1324,9 +1325,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
-		string type = "B";
+		globalEnums::chessType type = globalEnums::Bishop;
 
-		if(type != piece.GetType().substr(0,1))
+		if(type != piece.GetType())
 		{
 			cout << "Your piece is a " << piece.GetType() << ", not a Bishop, as was expected by the checkBishopMoves method";
 			return possibleMoves;
@@ -1454,9 +1455,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
-		string type = "N";
+		globalEnums::chessType type = globalEnums::Knight;
 
-		if("Knight" != piece.GetType())
+		if(globalEnums::Knight != piece.GetType())
 		{
 			cout << "Your piece is a " << piece.GetType() << ", not a Knight, as was expected by the checkKnightMoves method";
 			return possibleMoves;
@@ -1512,7 +1513,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
-		string type = "R";
+		globalEnums::chessType type = globalEnums::Rook;
 
 		if(type != piece.GetType().substr(0, 1))
 		{
@@ -1641,7 +1642,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		int currentFile = piece.GetFile();
 		int currentRank = piece.GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
-		string type = "P";
+		globalEnums::chessType type = globalEnums::Pawn;
 
 		if(type != piece.GetType().substr(0, 1))
 		{
@@ -1649,7 +1650,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 			return possibleMoves;
 		}
 
-        if(piece.GetColor() == "White")
+        if(piece.GetColor() == globalEnums::White)
         {
             if(IsOnBoard(currentRank + 1, currentFile) && board[currentRank + 1][currentFile].GetColor() == defaultChess.GetColor())
             {
@@ -1843,7 +1844,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         {
             Chess piece = tempPiecesOfColor.front();
             tempPiecesOfColor.pop_front();
-            if(piece.GetType() == "King")
+            if(piece.GetType() == globalEnums::King)
             {
                 king = piece;
                 kingPosition = alphabet.substr(king.GetRank(), 1) + to_string(king.GetFile());
@@ -1865,7 +1866,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             Chess checkingPiece = piecesCheckingKing.front();
             for(string move : possibleMoves)
             {
-                if(checkingPiece.GetType() == "Rook")
+                if(checkingPiece.GetType() == globalEnums::Rook)
                 {
                     if(checkingPiece.GetFile() == king.GetFile())//same file: only allow king moves off file and moves blocking file
                     {
@@ -1958,7 +1959,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     }
                 }
             
-                else if(checkingPiece.GetType() == "Bishop")//allow moves on diagonal that block check or take
+                else if(checkingPiece.GetType() == globalEnums::Bishop)//allow moves on diagonal that block check or take
                 {
                     if((checkingPiece.GetFile() - king.GetFile()) == (checkingPiece.GetRank() - king.GetRank()))//bottom left to top right diagonal
                     {
@@ -2050,7 +2051,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     }
                 }
 
-                else if(checkingPiece.GetType() == Queen)//find out whether it's diagonal or line check, do rook or bishop checks
+                else if(checkingPiece.GetType() == globalEnums::Queen)//find out whether it's diagonal or line check, do rook or bishop checks
                 {
                     
                     //rook ones
@@ -2235,7 +2236,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     }
                 }
 
-                else if(checkingPiece.GetType() == Knight)//piece must be taken or king move out of the way
+                else if(checkingPiece.GetType() == globalEnums::Knight)//piece must be taken or king move out of the way
                 {
                     if(move.substr(0, 1) == "K")//king: must move out of way of knight
                     {
@@ -2281,7 +2282,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
 	void LegalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
 	{
-		chessType type = piece.GetType();
+		globalEnums::chessType type = piece.GetType();
 		list<string> possibleMoves;
 		//Finding list of legal moves, depending on each piece
 		possibleMoves = FindMoves(piece);
@@ -2308,7 +2309,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 	list<string> FindMoves(Chess piece)
 	{
 		list<string> possibleMoves;
-		string type = piece.GetType();
+		globalEnums::chessType type = piece.GetType();
 
 		if(type == "King")
 		{
@@ -2536,7 +2537,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             {
                 Chess piece = board[row][col];
                 cout << piece.GetColor() << " " << piece.GetType() << endl;
-                if(piece.GetColor() == "White")
+                if(piece.GetColor() == globalEnums::White)
                 {
 
                     findingWhitePieces.push_back(piece);
@@ -2544,7 +2545,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     cout << "whitePieceCounter: " << whitePieceCounter << endl;
 
                 }
-                else if(piece.GetColor() == "Black")
+                else if(piece.GetColor() == globalEnums::Black)
                 {
                     findingBlackPieces.push_back(piece);
                     blackPieceCounter++;
@@ -2569,14 +2570,14 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             cin >> color;
         }
 
-        string computerColor;
-        if(color == "White")
+        globalEnums::chessColor computerColor;
+        if(color == globalEnums::White)
         {
-            computerColor = "Black";
+            computerColor = globalEnums::Black;
         }
         else//color has to be black (the previous check was already done to make sure)
         {
-            computerColor = "White";
+            computerColor = globalEnums::White;
         }
 
         
@@ -2607,7 +2608,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     for(int file = 0; file < 8; file++)
                     {
                         Chess p = board[rank][file];
-                        if(p.GetType() == "King" && p.GetColor() == computerColor)
+                        if(p.GetType() == globalEnums::King && p.GetColor() == computerColor)
                         {
                             king = p;
                             cout << "Black's king has been found" << endl;
@@ -2631,7 +2632,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     for(int file = 0; file < 8; file++)
                     {
                         Chess p = board[rank][file];
-                        if(p.GetType() == "King" && p.GetColor() == computerColor)
+                        if(p.GetType() == globalEnums::King && p.GetColor() == computerColor)
                         {
                             king = p;
                             cout << "Black's king has been found" << endl;

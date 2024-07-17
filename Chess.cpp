@@ -10,8 +10,8 @@ using namespace std;
 class Chess
 {
 	private:
-		enum chessColor _color;
-		enum chessType _type;
+		globalEnums::chessColor _color;
+		globalEnums::chessType _type;
 		Position _pos;
 		
 		//checkKingMoves(Chess);
@@ -43,14 +43,14 @@ class Chess
 		Chess::Chess()//default constructor (empty square)
 		: _pos('z', -1)//, _color(-1), _type(-1) 
 		{
-			_color = NO_COLOR;
-			_type = NO_TYPE;
+			_color = globalEnums::NO_COLOR;
+			_type = globalEnums::NO_TYPE;
 		}
 
 		Chess::Chess(const Chess& piece)//copy constructor
 		: _pos(piece._pos), _color(piece._color), _type(piece._type) {}
 
-		Chess::Chess(chessColor c, chessType t, char f, int r) //parameterized constructor
+		Chess::Chess(globalEnums::chessColor c, globalEnums::chessType t, char f, int r) //parameterized constructor
 		: _color(c), _type(t), _pos(f, r) {}
 
 		Chess::Chess(string loc) //Starting square constructor
@@ -61,29 +61,29 @@ class Chess
 			
 			if (_pos.rank == 0 || _pos.rank == 1) //White Starting ranks
 			{
-				_color = White;
+				_color = globalEnums::White;
 				if(_pos.rank == 1) {//Starting White Pawn rank (rank 2)
-					_type = Pawn;
+					_type = globalEnums::Pawn;
 					}
 				else if (loc == "a1" || loc == "h1") { //Starting White Rook positions
-					_type = Rook;
+					_type = globalEnums::Rook;
 					}
 				else if (loc == "b1" || loc == "g1") {//Starting White Knight positions
-					_type = Knight;
+					_type = globalEnums::Knight;
 					}
 				else if (loc == "c1" || loc == "f1") {//Starting White Bishop positions
-					_type = Bishop;
+					_type = globalEnums::Bishop;
 					}
 				else if (loc == "d1") {//Starting White Queen position
-					_type = Queen;
+						_type = globalEnums::Queen;
 					}
 				else if (loc == "e1") {//Starting White King position
-					_type = King;
+					_type = globalEnums::King;
 					}
 				else {
 					cout << "The non-starting position inputted was" << loc;
-					_color = -1;
-					_type = -1;
+					_color = globalEnums::NO_COLOR;
+					_type = globalEnums::NO_TYPE;
 					_pos = Position('z', -1);
 					cout << "Must be out of bounds, as the piece should be in ranks 1 and 2, but isn't in the selected range - probably due to file number";
 					cout << "Position check is " << _pos << endl; //pretty sure this inclusion of the Position will return a bool
@@ -91,29 +91,29 @@ class Chess
 			}
 			else if (_pos.rank == 6 || _pos.rank == 7) //Black Starting ranks
 			{
-				_color = Black;
+				_color = globalEnums::Black;
 				if (_pos.rank == 6) { //Starting Black Pawn rank (rank 7)
-					_type = Pawn;
+					_type = globalEnums::Pawn;
 				}
 				else if (loc == "a8" || loc == "h8") { //Starting Black Rook positions
-					_type = Rook;
+					_type = globalEnums::Rook;
 				}
 				else if (loc == "b8" || loc == "g8") {//Starting Black Knight positions
-					_type = Knight;
+					_type = globalEnums::Knight;
 				}
 				else if (loc == "c8" || loc == "f8") {//Starting Black Bishop positions
-					_type = Bishop;
+					_type = globalEnums::Bishop;
 				}
 				else if (loc == "d8") {//Starting Black Queen positions
-					_type = Queen;
+					_type = globalEnums::Queen;
 				}
 				else if (loc == "e8") {//Starting Black King positions
-					_type = King;
+					_type = globalEnums::King;
 				}
 				else {
 					cout << "The non-starting position inputted was " << loc;
-					_color = NO_COLOR;
-					_type = NO_TYPE;
+					_color = globalEnums::NO_COLOR;
+					_type = globalEnums::NO_TYPE;
 					_pos = Position('z', -1);
 					cout << "Must be out of bounds, as the piece should be in ranks 7 or 8, but isn't in the selected range - probably due to file number";
 					cout << "Position check is " << _pos << endl; //pretty sure this inclusion of the Position will return a bool
@@ -121,8 +121,8 @@ class Chess
 			}
 			else {
 				cout << "The non-starting position inputted was " << loc;
-				_color = NO_COLOR;
-				_type = NO_TYPE;
+				_color = globalEnums::NO_COLOR;
+				_type = globalEnums::NO_TYPE;
 				_pos = Position('z', -1);
 				cout << "Position check is " << _pos << endl; //pretty sure this inclusion of the Position will return a bool
 			}
@@ -137,19 +137,19 @@ class Chess
 	
 	//Getter methods
 
-	chessColor GetColor() 
+	globalEnums::chessColor GetColor() 
 	{
 		return _color;
+	}
+	globalEnums::chessType GetType() 
+	{
+		return _type;
 	}
 	int GetFile() {
 		return _pos.file;
 	}
 	char GetRank() {
 		return _pos.rank;
-	}
-	chessType GetType() 
-	{
-		return _type;
 	}
 
 	
