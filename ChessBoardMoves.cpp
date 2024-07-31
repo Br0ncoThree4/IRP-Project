@@ -1,117 +1,89 @@
 using namespace std;
-#include <iostream>
-#include <string>
-#include <list>
-#include "Chess.cpp"
-#include <array>
-#include <cstdlib>//includes rand() method
-#include <unordered_map>
-#include "basic.h"
+
+#include "ChessBoardMoves.h"
+#include "Move.cpp"
 #ifndef NULL
 #define NULL 0
 #endif
 
 class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 {
-    public:
-        Chess board[8][8];
+    private:
+        Chess* board[8][8];
         bool whiteKingInCheck;
         bool blackKingInCheck;
-		string alphabet;
-        list<Chess> blackPieces;
-        list<Chess> whitePieces;
-        list<Chess> totalPieces;
+		string alphabet = "abcdefgh";
+        list<Chess*> blackPieces;
+        list<Chess*> whitePieces;
+        list<Chess*> blankSquares;
         bool MoveWentThrough;
-        list<string> previousWhiteMoves;
-        list<string> previousBlackMoves;
-        list<list<Chess>> boardList;
-        Chess defaultChess;
-
-        /**
-         * ChessBoardMoves();
-        ChessBoardMoves(list<Chess>);
-        Chess board[8][8];
-        bool kingInCheck; //Checks if king is in check
-		static string alphabet;
-		list<string> checkKingMoves(Chess);
-		list<string> checkRookMoves(Chess);
-		list<string> checkBishopMoves(Chess);
-		list<string> checkKnightMoves(Chess);
-		list<string> checkQueenMoves(Chess);
-		list<string> checkPawnMoves(Chess);
-		//LegalMove(Chess, string);
-		//Move(Chess, string);
-		bool IsOnBoard(string);
-		list<string> FindMoves(Chess);
-		list<string> StartingMoves();
-         * 
-         */
+        MoveVector possibleWhiteMoves;
+        MoveVector possibleBlackMoves;
     
+    public:
 
-    ChessBoardMoves()//empty board
+    ChessBoardMoves::ChessBoardMoves()//empty board
+    : whiteKingInCheck(false), blackKingInCheck(false), MoveWentThrough(true), possibleWhiteMoves(globalEnums::White), possibleBlackMoves(globalEnums::Black)
     {
         for (int r = 0; r < 8; r++)
         {
             for(int f = 0; f < 8; f++)
             {
-                board[r][f] = Chess();
+                board[r][f] = new Chess(globalEnums::BLANK_COLOR, globalEnums::BLANK_TYPE, f, r); //creates a 2D array of empty squares across the entire board 
             }
         }
-		alphabet = "abcdefgh";
-        whiteKingInCheck = false;
-        blackKingInCheck = false;
         whitePieces;
         blackPieces;
-        totalPieces;
-        MoveWentThrough = true;
-        previousWhiteMoves;
-        previousBlackMoves;
-        boardList.push_back(totalPieces);
-        defaultChess = Chess();
+        blankSquares;
     }
 
-    ChessBoardMoves(list<Chess> pieceList) {//Creates the 2D array that is the board, given the list of starting chess pieces
-        defaultChess = Chess();
+    ChessBoardMoves::ChessBoardMoves(list<Chess*> pieceList) //Creates the 2D array that is the board, given the list of starting chess pieces
+    : possibleWhiteMoves(globalEnums::White), possibleBlackMoves(globalEnums::Black) {
         int length = pieceList.size();
-        list<Chess> tempPieceList = pieceList;
+        cout << "Length for a standard board should be 64 and is: " << length << endl;
+        //list<Chess*> tempPieceList = pieceList;
         for (int counter = 0; counter < length; counter++) //putting each chess piece on their starting squares
         {
-            Chess piece = tempPieceList.front();
-            tempPieceList.pop_front();
-            int rank = piece.GetRank();
-            int file = piece.GetFile();
-            board[rank][file] = piece;
-            totalPieces.push_back(piece);
-            if(piece.GetColor() == globalEnums::White)
+            Chess* piece = pieceList.front();
+            pieceList.pop_front();
+            int rank = piece->GetRank();
+            char file = piece->GetFile();
+            board[rank][file - '0'] = piece;
+            if(piece->GetColor() == globalEnums::White)
             {
                 whitePieces.push_back(piece);
+                possibleWhiteMoves.push_back(piece);
+                
             }
-            else if(piece.GetColor() == globalEnums::Black)
+            else if(piece->GetColor() == globalEnums::Black)
             {
                 blackPieces.push_back(piece);
+                possibleBlackMoves.push_back(piece);
+            }
+            else
+            {
+                blankSquares.push_back(piece);
             }
         }
         for (int rank = 7; rank >= 0; rank--) { //printing the board and its square number
             for (int col = 0; col <= 7; col++) {
-                if (board[rank][col].GetType() != defaultChess.GetType()) {
-                    std::cout << board[rank][col].GetColor() << " " << board[rank][col].GetType() << "\t";
+                if (board[rank][col]->GetType() != globalEnums::NULL_TYPE) {
+                    std::cout << board[rank][col]->GetColor() << " " << board[rank][col]->GetType() << "\t";
                 }
                 else {
                     std::cout << "\t"; //trying to space the board out so that even if theres nothing, the board still kind of keeps is square shape
                 }
                 std::cout << "(" << "abcdefgh"[col] << (rank + 1) << ")" << "\t";
-                cout << "rank " << rank << ", col " << col << endl;
+                std::cout << "rank " << rank << ", col " << col << endl;
             }
             std::cout << endl;
         }
 
-		alphabet = "abcdefgh";
         whiteKingInCheck = false;
         blackKingInCheck = false;
         MoveWentThrough = true;
-        previousWhiteMoves = WhiteStartingMoves();
-        previousBlackMoves = BlackStartingMoves();
-        boardList.push_back(totalPieces);
+        possibleWhiteMoves = WhiteStartingMoves();
+        possibleBlackMoves = BlackStartingMoves();
     }
     //we also need a printing method for the chess board
 
@@ -120,7 +92,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
 
 
-	list<string> WhiteStartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few letters)
+	list<string> ChessBoardMoves::WhiteStartingMoves() //Returns starting moves for white (can be altered to make it for black, just need to change a few letters)
 	{
 		list<string> moves; //White Starting Moves
 		//Pawn Moves
@@ -141,7 +113,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		return moves;
 	}
 
-    list<string> BlackStartingMoves()
+    list<string> ChessBoardMoves::BlackStartingMoves()
     {
         list<string> moves;
         //Pawn Moves
@@ -165,27 +137,24 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return moves;
     }
 
-	void Move(Chess piece, string newPosition) 
+	void ChessBoardMoves::Move(Chess* piece, Position newPosition) 
     {
-		string block = IsBlockingCheck(piece);//stores piece type and location (such as Ke1) or ""
-        if(block != "")
+		bool blockingCheck = IsBlockingCheck(piece);//stores piece type and location (such as Ke1) or ""
+        if(blockingCheck == true)
         {
-            cout << "This piece is blocking check from " + block + ", so it can't move";
+            cout << "This piece is blocking a check, so it can't move";
+            return;
         }
-        else
-        {
-		    int newRank = ChangeLetterToNumber(newPosition.substr(0, 1));
-		    int newFile = stoi(newPosition.substr(1, 1));
-
-            //move the piece
-            board[piece.GetRank()][piece.GetFile()] = Chess();
-            board[newRank][newFile] = piece;
             
-            piece.SetPosition(newPosition);//set position for the piece's instance variables 
-        }
+        //move the piece
+            
+        piece->SetPosition(board, newPosition);//set position for the piece's instance variables 
 	}
 
-    void Move(globalEnums::chessColor color, string move)
+    /*
+    //function commented out on 7/18, might change how this function works in order to ensure that the moves are as efficient as possible 
+        //(checking moves ahead of time, then checking that list to see whether or not the move is on there before starting the process of moving the piece over)
+    void ChessBoardMoves::Move(globalEnums::chessColor color, string move)
     {
         globalEnums::chessType type;
         
@@ -275,10 +244,10 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 {
                     for(int c = 0; c <= 7; c++)
                     {
-                        if(theBoard[r][c].GetColor() != defaultChess.GetColor())
+                        if(theBoard[r][c]->GetColor() != blankPiece->GetColor())
                         {
                             Chess piece = theBoard[r][c];
-                            cout << piece.GetColor() + " " << piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " << piece.GetRank() << " ";
+                            std::cout << piece.GetColor() + " " << piece.GetType() << " " << alphabet.substr(piece.GetFile(), 1) << " " << piece.GetRank() << " ";
                         }
                         cout << "endl";
                     }
@@ -508,7 +477,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 cout << "New length: " << blackPieces.size() << endl;
             }
             cout << "The piece has been removed from its list" << endl;
-            board[piece.GetRank()][piece.GetFile()] = Chess();
+            board[piece.GetRank()][piece.GetFile()] = blankPiece;
             board[newRank][newFile] = piece;
             
             piece.SetPosition(newPosition);//set position for the piece's instance variables 
@@ -516,13 +485,13 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             cout << "New Position of piece: " << alphabet.substr(piece.GetFile(), 1) << (piece.GetRank() + 1) << endl;
             if(color == globalEnums::White)
             {
-                whitePieces.push_back(piece);
+                whitePieces.push_back(&piece);
                 cout << "Newer Length: " << whitePieces.size() << endl;
-                list<Chess> tempPieces = whitePieces;
+                list<Chess*> tempPieces = whitePieces;
                 cout << "whitePieces" << endl;
                 for(int counter = 0; counter < whitePieces.size(); counter++)
                 {
-                    Chess tempPiece = tempPieces.front();
+                    Chess tempPiece = *(tempPieces.front());
                     tempPieces.pop_front();
                     cout << tempPiece.GetColor() << " " << tempPiece.GetType() << " " << alphabet.substr(tempPiece.GetFile(), 1) << tempPiece.GetRank() + 1 << "\t";
                 }
@@ -530,13 +499,13 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             }
             else
             {
-                blackPieces.push_back(piece);
+                blackPieces.push_back(&piece);
                 cout << "Newer Length: " << blackPieces.size() << endl;
-                list<Chess> tempPieces = blackPieces;
+                list<Chess*> tempPieces = blackPieces;
                 cout << "blackPieces" << endl;
                 for(int counter = 0; counter < blackPieces.size(); counter++)
                 {
-                    Chess tempPiece = tempPieces.front();
+                    Chess tempPiece = *(tempPieces.front());
                     tempPieces.pop_front();
                     cout << tempPiece.GetColor() << " " << tempPiece.GetType() << " " << alphabet.substr(tempPiece.GetFile(), 1) << tempPiece.GetRank() + 1 << "\t";
                 }
@@ -544,40 +513,41 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             }
         }
     }
+    */
 
 
-	string IsBlockingCheck(Chess piece)//will return piece type and location that is getting blocked or will return ""
+	bool ChessBoardMoves::IsBlockingCheck(Chess* piece)//will return true if the piece is blocking check or false if it is not
 	{
         bool isBlockingDiagonalCheck = false;
         bool isBlockingLineCheck = false;
-        int currentFile = piece.GetFile();
-		int currentRank = piece.GetRank();
+        int currentFile = piece->GetFile();
+		int currentRank = piece->GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank);
-        string pieceGettingBlocked;
+        Chess pieceGettingBlocked;
         string areaBlocking;
         
         //If king is in open sight of piece (need to check all diagonals and lines)
 
         //If the piece is blocking a bishop/queen on diagonals or rook/queen on files, it should keep the threatening piece's position
 
-        int kingFile;
+        char kingFile;
         int kingRank;
         for(int row = 0; row < 8; row++)
         {
             for(int col = 0; col < 8; col++)
             {
-                Chess possibleKing = board[row][col];
-                if(possibleKing.GetType() == globalEnums::King && possibleKing.GetColor() == piece.GetColor())//piece is the correct king
+                Chess* possibleKing = board[row][col];
+                if(possibleKing->GetType() == globalEnums::King && possibleKing->GetColor() == piece->GetColor())//piece is the correct king
                 {
-                    kingFile = possibleKing.GetFile();
-                    kingRank = possibleKing.GetRank();
+                    kingFile = possibleKing->GetFile();
+                    kingRank = possibleKing->GetRank();
                 }
             }
         }
         
         //diagonals check
         int counter = 1;
-        if((kingFile - kingRank) == (currentFile - currentRank))//on bottom left to top right diagonal
+        if((kingFile - '0' - kingRank) == (currentFile - '0' - currentRank))//on bottom left to top right diagonal
         {
             bool isBlockingCheck = true;
             bool isToRightAndAbove = kingFile > currentFile;//if kingFile > currentFile, king is to the right of currentPiece, so king is also above currentPiece
@@ -587,7 +557,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(isToRightAndAbove)//king is to the right of current piece
                 {
                     checkToLeftAndBelow = true;
-                    if(board[kingRank - diff][kingFile - diff].GetColor() == globalEnums::White || board[kingRank - diff][kingFile - diff].GetColor() == globalEnums::Black)
+                    if(board[kingRank - diff][kingFile - diff]->GetColor() == globalEnums::White || board[kingRank - diff][kingFile - diff]->GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -595,7 +565,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the left of current piece
                 {
                     checkToLeftAndBelow = false;//check to the right of currentPiece
-                    if(board[kingRank + diff][kingFile + diff].GetColor() == globalEnums::White || board[kingRank + diff][kingFile + diff].GetColor() == globalEnums::Black)
+                    if(board[kingRank + diff][kingFile + diff]->GetColor() == globalEnums::White || board[kingRank + diff][kingFile + diff]->GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -611,31 +581,33 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     {
                         if(IsOnBoard(currentRank - x, currentFile - x))
                         {
-                            Chess possibleBlocker = board[currentRank - x][currentFile + x];
-                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            Chess* possibleBlocker = board[currentRank - x][currentFile + x];
+                            if(possibleBlocker->GetColor() == globalEnums::NO_COLOR)
                             {
                                 //increment, square is empty
                             }
-                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            else if(possibleBlocker->GetColor() == piece->GetColor())
                             {
-                                return "";//is piece of the same color, can't be checking the king
+                                return false;//is piece of the same color, can't be checking the king
                             }
                             else//possibleBlocker is other color
                             {
-                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Bishop)
+                                if(possibleBlocker->GetType() == globalEnums::Queen || possibleBlocker->GetType() == globalEnums::Bishop)
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
-                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                    pieceGettingBlocked = possibleBlocker->GetType().substr(0, 1) + alphabet.substr(possibleBlocker->GetFile(), 1) + to_string(possibleBlocker->GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
+                                    cout << "This check is getting blocked: " << endl << "There is a " << possibleBlocker->GetType() << " on " << possibleBlocker-:GetFile() << possibleBlocker->GetRank() << endl;
+                                    return true; //returns piece type and location (Ke1)
                                 }
                                 else
                                 {
-                                    return "";//piece won't check King
+                                    cout << "There is a piece here, but they will not check the King, as they are a " << possibleBlocker->GetType() << "and not a Queen or Bishop" << endl;
+                                    return false;//piece won't check King
                                 }
                             }
                         }
                         else
                         {
-                            return "";//ends the loop is it isn't on board, can return "" because there's nothing else that could be trying to check the king
+                            return false;//ends the loop if it isn't on board, can return false because there's nothing else that could be trying to check the king
                         }
                     }
                 }
@@ -645,31 +617,32 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                     {
                         if(IsOnBoard(currentRank + x, currentFile + x))
                         {
-                            Chess possibleBlocker = board[currentRank][currentFile + x];
-                            if(possibleBlocker.GetColor() == Chess().GetColor())
+                            Chess* possibleBlocker = board[currentRank][currentFile + x];
+                            if(possibleBlocker->GetColor() == globalEnums::NO_COLOR)
                             {
                                 //square is empty, keep looking (this just ends this iteration of the for loop and allows x to increment)
                             }
-                            else if(possibleBlocker.GetColor() == piece.GetColor())
+                            else if(possibleBlocker->GetColor() == piece->GetColor())
                             {
-                                return "";//ends loop: same color, can't be blocking check, can return ""
+                                return false;//ends loop: same color, can't be blocking check, can return ""
                             }
                             else
                             {
-                                if(possibleBlocker.GetType() == globalEnums::Queen || possibleBlocker.GetType() == globalEnums::Bishop)
+                                if(possibleBlocker->GetType() == globalEnums::Queen || possibleBlocker->GetType() == globalEnums::Bishop)
                                 {
-                                    pieceGettingBlocked = possibleBlocker.GetType().substr(0, 1) + alphabet.substr(possibleBlocker.GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
-                                    return pieceGettingBlocked; //returns piece type and location (Ke1)
+                                    pieceGettingBlocked = possibleBlocker->GetType().substr(0, 1) + alphabet.substr(possibleBlocker->GetFile(), 1) + to_string(possibleBlocker.GetRank() + 1);//square has piece that is threatening a check, cannot move this piece
+                                    cout << "There is a piece here \nThis piece is a " << possibleBlocker->GetType() << " on " << possibleBlocker=>GetFile() << possibleBlocker->GetRank() << endl;
+                                    return true; //returns piece type and location (Ke1)
                                 }
                                 else
                                 {
-                                    return "";//piece won't check King
+                                    return false;//piece won't check King
                                 }
                             }
                         }
                         else
                         {
-                            return "";//ends the loop, can return ""
+                            return false;//out of bounds, can return false
                         }
                     }
                 }
@@ -685,7 +658,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(kingToLeftAndAbove)//king is to the left (and above) the current piece
                 {
                     checkToRightAndBelow = true;
-                    if(board[kingFile - diff][kingRank + diff].GetColor() == globalEnums::White || board[kingFile - diff][kingRank + diff].GetColor() == globalEnums::Black)
+                    if(board[kingFile - diff][kingRank + diff]->GetColor() == globalEnums::White || board[kingFile - diff][kingRank + diff]->GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -693,7 +666,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is to the right (and below) the current piece
                 {
                     checkToRightAndBelow = false;
-                    if(board[kingFile + diff][kingRank - diff].GetColor() == globalEnums::White || board[kingFile + diff][kingRank - diff].GetColor() == globalEnums::Black)
+                    if(board[kingFile + diff][kingRank - diff]->GetColor() == globalEnums::White || board[kingFile + diff][kingRank - diff]->GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -784,7 +757,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 if(kingIsAbove)//king is above the currentpiece
                 {
                     belowCheck = true;
-                    if(board[kingFile][kingRank - diff].GetColor() != defaultChess.GetColor())
+                    if(board[kingFile][kingRank - diff]->GetColor() != globalEnums::NO_COLOR)
                     {
                         isBlockingCheck = false;
                     }
@@ -792,7 +765,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
                 else//king is below the currentPiece
                 {
                     belowCheck = false;
-                    if(board[kingFile][currentRank + diff].GetColor() == globalEnums::White || board[kingFile][currentRank + diff].GetColor() == globalEnums::Black)
+                    if(board[kingFile][currentRank + diff]->GetColor() == globalEnums::White || board[kingFile][currentRank + diff]->GetColor() == globalEnums::Black)
                     {
                         isBlockingCheck = false;
                     }
@@ -1017,57 +990,58 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 	}
 
 
-	list<string> checkKingMoves(Chess piece) // will return K*file letter**rank number (as a string)*
+	MoveVector ChessBoardMoves::checkKingMoves(Chess* piece) // will return K*file letter**rank number (as a string)*
 	{
-		std::list<string> possibleMoves;
-		int currentFile = piece.GetFile();
-		int currentRank = piece.GetRank();
+		MoveVector possibleMoves;
+		int currentFile = piece->GetFile();
+		int currentRank = piece->GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		string type = "K";
 
-		if(globalEnums::King != piece.GetType())
+		if(globalEnums::King != piece->GetType())
 		{
-			cout << "Your piece is a " << piece.GetType() << ", not a King, as was expected by the checkKingMoves method";
+			cout << "Your piece is a " << piece->GetType() << ", not a King, as was expected by the checkKingMoves method";
 			return possibleMoves;
 		}
 
 		
-		if(IsOnBoard(currentRank + 1, currentFile) && board[currentRank + 1][currentFile].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 1, currentFile) && board[currentRank + 1][currentFile]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1 + 1);
+            Move* newMove = new Move(piece, )
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile) && board[currentRank - 1][currentFile].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 1, currentFile) && board[currentRank - 1][currentFile]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 1, currentFile + 1) && board[currentRank + 1][currentFile + 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 1, currentFile + 1) && board[currentRank + 1][currentFile + 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile + 1) && board[currentRank - 1][currentFile + 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 1, currentFile + 1) && board[currentRank - 1][currentFile + 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 1, currentFile - 1) && board[currentRank + 1][currentFile - 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 1, currentFile - 1) && board[currentRank + 1][currentFile - 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile - 1) && board[currentRank - 1][currentFile - 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 1, currentFile - 1) && board[currentRank - 1][currentFile - 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank, currentFile + 1) && board[currentRank][currentFile + 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank, currentFile + 1) && board[currentRank][currentFile + 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank, currentFile - 1) && board[currentRank][currentFile - 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank, currentFile - 1) && board[currentRank][currentFile - 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1);
 			possibleMoves.push_back(position);
@@ -1076,7 +1050,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		return possibleMoves;
 	}
 
-	list<string> checkQueenMoves(Chess piece)
+	list<string> ChessBoardMoves::checkQueenMoves(Chess* piece)
 	{
 		std::list<string> possibleMoves;
 		int currentFile = piece.GetFile();
@@ -1084,9 +1058,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		globalEnums::chessType type = globalEnums::Queen;
 
-		if(type != piece.GetType())
+		if(type != piece->GetType())
 		{
-			cout << "Your piece is a " << piece.GetType() << ", not a Queen, as was expected by the checkQueenMoves method";
+			cout << "Your piece is a " << piece->GetType() << ", not a Queen, as was expected by the checkQueenMoves method";
 			return possibleMoves;
 		}
 
@@ -1095,11 +1069,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank + counter, currentFile + counter))
             {
-                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//square is open or can be taken
+                if(board[currentRank + counter][currentFile + counter]->GetColor() != piece->GetColor())//square is open or can be taken
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank + counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank + counter][currentFile + counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1123,11 +1097,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank - counter, currentFile - counter))
             {
-                if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank - counter][currentFile - counter]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank - counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank - counter][currentFile - counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1151,11 +1125,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank - counter, currentFile + counter))
             {
-                if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank - counter][currentFile + counter]0->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank - counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank - counter][currentFile + counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1179,11 +1153,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank + counter, currentFile - counter))
             {
-                if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank + counter][currentFile - counter]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank + counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank + counter][currentFile - counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1208,11 +1182,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank + counter, currentFile))
             {
-                if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank + counter][currentFile]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank + counter][currentFile].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank + counter][currentFile]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1236,11 +1210,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank - counter, currentFile))
             {
-                if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank - counter][currentFile]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank - counter][currentFile].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank - counter][currentFile]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1264,11 +1238,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank, currentFile + counter))
             {
-                if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                if(board[currentRank][currentFile + counter]->GetColor() != piece->GetColor())//either null or other color)
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank][currentFile + counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1292,11 +1266,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank, currentFile - counter))
             {
-                if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank][currentFile - counter]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank][currentFile - counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1319,17 +1293,17 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return possibleMoves;
 	}
 
-	list<string> checkBishopMoves(Chess piece) //will return B*file letter**rank number (as string)*
+	list<string> ChessBoardMoves::checkBishopMoves(Chess* piece) //will return B*file letter**rank number (as string)*
 	{
 		std::list<string> possibleMoves;
-		int currentFile = piece.GetFile();
-		int currentRank = piece.GetRank();
+		int currentFile = piece->GetFile();
+		int currentRank = piece->GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		globalEnums::chessType type = globalEnums::Bishop;
 
-		if(type != piece.GetType())
+		if(type != piece->GetType())
 		{
-			cout << "Your piece is a " << piece.GetType() << ", not a Bishop, as was expected by the checkBishopMoves method";
+			cout << "Your piece is a " << piece->GetType() << ", not a Bishop, as was expected by the checkBishopMoves method";
 			return possibleMoves;
 		}
 
@@ -1338,11 +1312,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank + counter, currentFile + counter))
             {
-                if(board[currentRank + counter][currentFile + counter].GetColor() != piece.GetColor())//square is open or can be taken
+                if(board[currentRank + counter][currentFile + counter]->GetColor() != piece->GetColor())//square is open or can be taken
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank + counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank + counter][currentFile + counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1366,11 +1340,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank - counter, currentFile - counter))
             {
-                if(board[currentRank - counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank - counter][currentFile - counter]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank - counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank - counter][currentFile - counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1394,11 +1368,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank - counter, currentFile + counter))
             {
-                if(board[currentRank - counter][currentFile + counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank - counter][currentFile + counter]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank - counter][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank - counter][currentFile + counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1422,11 +1396,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank + counter, currentFile - counter))
             {
-                if(board[currentRank + counter][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank + counter][currentFile - counter]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank + counter][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank + counter][currentFile - counter].GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1449,56 +1423,56 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return possibleMoves;
 	}
 
-	list<string> checkKnightMoves(Chess piece) //Will return Ng1f3
+	list<string> ChessBoardMoves::checkKnightMoves(Chess* piece) //Will return Ng1f3
 	{
 		list<string> possibleMoves;
-		int currentFile = piece.GetFile();
-		int currentRank = piece.GetRank();
+		int currentFile = piece->GetFile();
+		int currentRank = piece->GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		globalEnums::chessType type = globalEnums::Knight;
 
-		if(globalEnums::Knight != piece.GetType())
+		if(globalEnums::Knight != piece->GetType())
 		{
-			cout << "Your piece is a " << piece.GetType() << ", not a Knight, as was expected by the checkKnightMoves method";
+			cout << "Your piece is a " << piece->GetType() << ", not a Knight, as was expected by the checkKnightMoves method";
 			return possibleMoves;
 		}
 
-		if(IsOnBoard(currentRank + 1, currentFile + 2) && board[currentRank + 1][currentFile + 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 1, currentFile + 2) && board[currentRank + 1][currentFile + 2]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank + 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile + 2) && board[currentRank - 1][currentFile + 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 1, currentFile + 2) && board[currentRank - 1][currentFile + 2]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 2, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 1, currentFile - 2) && board[currentRank + 1][currentFile - 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 1, currentFile - 2) && board[currentRank + 1][currentFile - 2]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank + 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 1, currentFile - 2) && board[currentRank - 1][currentFile - 2].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 1, currentFile - 2) && board[currentRank - 1][currentFile - 2]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 2, 1) + to_string(currentRank - 1 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 2, currentFile + 1) && board[currentRank + 2][currentFile + 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 2, currentFile + 1) && board[currentRank + 2][currentFile + 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 2 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank + 2, currentFile - 1) && board[currentRank + 2][currentFile - 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank + 2, currentFile - 1) && board[currentRank + 2][currentFile - 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 2 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 2, currentFile + 1) && board[currentRank - 2][currentFile + 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 2, currentFile + 1) && board[currentRank - 2][currentFile + 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 2 + 1);
 			possibleMoves.push_back(position);
 		}
-		if(IsOnBoard(currentRank - 2, currentFile - 1) && board[currentRank - 2][currentFile - 1].GetColor() != piece.GetColor())
+		if(IsOnBoard(currentRank - 2, currentFile - 1) && board[currentRank - 2][currentFile - 1]->GetColor() != piece->GetColor())
 		{
 			string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 2 + 1);
 			possibleMoves.push_back(position);
@@ -1507,17 +1481,17 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		return possibleMoves;
 	}
 
-	list<string> checkRookMoves(Chess piece)
+	list<string> ChessBoardMoves::checkRookMoves(Chess* piece)
 	{
 		list<string> possibleMoves;
-		int currentFile = piece.GetFile();
-		int currentRank = piece.GetRank();
+		int currentFile = piece->GetFile();
+		int currentRank = piece->GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		globalEnums::chessType type = globalEnums::Rook;
 
-		if(type != piece.GetType().substr(0, 1))
+		if(type != piece->GetType())
 		{
-			cout << "Your piece is a " << piece.GetType() << ", not a Rook, as was expected by the checkRookMoves method";
+			cout << "Your piece is a " << piece->GetType() << ", not a Rook, as was expected by the checkRookMoves method";
 			return possibleMoves;
 		}
 
@@ -1525,11 +1499,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank + counter, currentFile))
             {
-                if(board[currentRank + counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank + counter][currentFile]->GetColor() != piece-GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank + counter][currentFile].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank + counter][currentFile]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1553,11 +1527,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank - counter, currentFile))
             {
-                if(board[currentRank - counter][currentFile].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank - counter][currentFile]->GetColor() != piece->GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - counter + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank - counter][currentFile].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank - counter][currentFile]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1581,11 +1555,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank, currentFile + counter))
             {
-                if(board[currentRank][currentFile + counter].GetColor() != piece.GetColor())//either null or other color)
+                if(board[currentRank][currentFile + counter]->GetColor() != piece->GetColor())//either null or other color)
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile + counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank][currentFile + counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank][currentFile + counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1609,11 +1583,11 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         do{
             if(IsOnBoard(currentRank, currentFile - counter))
             {
-                if(board[currentRank][currentFile - counter].GetColor() != piece.GetColor())//either null or other color
+                if(board[currentRank][currentFile - counter]->GetColor() != piece.GetColor())//either null or other color
                 {
                     string position = type + currentPosition + alphabet.substr(currentFile - counter, 1) + to_string(currentRank + 1);
                     possibleMoves.push_back(position);
-                    if(board[currentRank][currentFile - counter].GetColor() == defaultChess.GetColor())
+                    if(board[currentRank][currentFile - counter]->GetColor() == globalEnums::BLANK_COLOR)
                     {
                         counter++;
                     }
@@ -1636,61 +1610,61 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return possibleMoves;
 	}
 
-	list<string> checkPawnMoves(Chess piece)
+	list<string> ChessBoardMoves::checkPawnMoves(Chess* piece)
 	{
 		list<string> possibleMoves;
-		int currentFile = piece.GetFile();
-		int currentRank = piece.GetRank();
+		int currentFile = piece->GetFile();
+		int currentRank = piece->GetRank();
         string currentPosition = alphabet.substr(currentFile, 1) + to_string(currentRank + 1);
 		globalEnums::chessType type = globalEnums::Pawn;
 
-		if(type != piece.GetType().substr(0, 1))
+		if(type != piece->GetType())
 		{
-			cout << "Your piece is a " << piece.GetType() << ", not a Pawn, as was expected by the checkPawnMoves method";
+			cout << "Your piece is a " << piece->GetType() << ", not a Pawn, as was expected by the checkPawnMoves method";
 			return possibleMoves;
 		}
 
-        if(piece.GetColor() == globalEnums::White)
+        if(piece->GetColor() == globalEnums::White)
         {
-            if(IsOnBoard(currentRank + 1, currentFile) && board[currentRank + 1][currentFile].GetColor() == defaultChess.GetColor())
+            if(IsOnBoard(currentRank + 1, currentFile) && board[currentRank + 1][currentFile]->GetColor() == globalEnums::BLANK_COLOR)
             {
                 string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank + 1, currentFile + 1) && (board[currentRank + 1][currentFile + 1].GetColor() != piece.GetColor() && board[currentRank + 1][currentFile + 1].GetColor() != defaultChess.GetColor()))
+            if(IsOnBoard(currentRank + 1, currentFile + 1) && (board[currentRank + 1][currentFile + 1]->GetColor() != piece->GetColor() && board[currentRank + 1][currentFile + 1]->GetColor() != globalEnums::BLANK_COLOR))
             {
                 string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank + 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank + 1, currentFile - 1) && (board[currentRank + 1][currentFile - 1].GetColor() != piece.GetColor() && board[currentRank + 1][currentFile - 1].GetColor() != defaultChess.GetColor()))
+            if(IsOnBoard(currentRank + 1, currentFile - 1) && (board[currentRank + 1][currentFile - 1]->GetColor() != piece->GetColor() && board[currentRank + 1][currentFile - 1]->GetColor() != globalEnums::BLANK_COLOR))
             {
                 string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank + 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank + 2, currentFile) && board[currentRank + 2][currentFile].GetColor() == defaultChess.GetColor() && currentRank == 1)
+            if(IsOnBoard(currentRank + 2, currentFile) && board[currentRank + 2][currentFile]->GetColor() == globalEnums::BLANK_COLOR && currentRank == 1)
             {
                 string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank + 2 + 1);
                 possibleMoves.push_back(position);
             }
         }
-        else
+        else //piece color == Black
         {
-            if(IsOnBoard(currentRank - 1, currentFile) && board[currentRank - 1][currentFile].GetColor() == defaultChess.GetColor())
+            if(IsOnBoard(currentRank - 1, currentFile) && board[currentRank - 1][currentFile]->GetColor() == globalEnums::BLANK_COLOR)
             {
                 string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank - 1, currentFile + 1) && (board[currentRank - 1][currentFile + 1].GetColor() != piece.GetColor() && board[currentRank - 1][currentFile + 1].GetColor() != defaultChess.GetColor()))
+            if(IsOnBoard(currentRank - 1, currentFile + 1) && (board[currentRank - 1][currentFile + 1]->GetColor() != piece->GetColor() && board[currentRank - 1][currentFile + 1]->GetColor() != globalEnums::BLANK_COLOR))
             {
                 string position = type + currentPosition + alphabet.substr(currentFile + 1, 1) + to_string(currentRank - 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank - 1, currentFile - 1) && (board[currentRank - 1][currentFile - 1].GetColor() != piece.GetColor() && board[currentRank - 1][currentFile - 1].GetColor() != defaultChess.GetColor()))
+            if(IsOnBoard(currentRank - 1, currentFile - 1) && (board[currentRank - 1][currentFile - 1]->GetColor() != piece->GetColor() && board[currentRank - 1][currentFile - 1]->GetColor() != globalEnums::BLANK_COLOR))
             {
                 string position = type + currentPosition + alphabet.substr(currentFile - 1, 1) + to_string(currentRank - 1 + 1);
                 possibleMoves.push_back(position);
             }
-            if(IsOnBoard(currentRank - 2, currentFile) && board[currentRank - 2][currentFile].GetColor() == defaultChess.GetColor() && currentRank == 6)
+            if(IsOnBoard(currentRank - 2, currentFile) && board[currentRank - 2][currentFile]->GetColor() == globalEnums::BLANK_COLOR && currentRank == 6)
             {
                 string position = type + currentPosition + alphabet.substr(currentFile, 1) + to_string(currentRank - 2 + 1);
                 possibleMoves.push_back(position);
@@ -1779,11 +1753,25 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 	 * 
 	 */
 
-    list<string> lineOfSight(string color)//intakes color, returns the squares that are getting watched by the other color(could be moved to by those pieces)
+    PositionVector ChessBoardMoves::lineOfSight(Chess* piece, unordered_map<Position*, Chess*>& secondaryLOS)
     {
-        list<Chess> piecesOfColor;
+        PositionVector primaryLOS(piece->GetColor()); //primary Line Of Sight: the piece can see this/move here right now
+        //secondary Line Of Sight: this piece could see this/move to this Position* if the Chess* piece moves
+            //secondaryLOS is passed into this function
+
+        //first, check if the piece does not have a LineOfSight (i.e. they are Pawns, Kings, or Knights)
+        if(piece->GetType() == globalEnums::Pawn || piece->GetType() == globalEnums::King || piece->GetType() == globalEnums::Knight)
+        {
+            return primaryLOS; //empty PositionVector besides color
+        }
+        //else: the piece is a Rook, Bishop, or Queen, so they have a line of sight that they can see and a secondary line of sight that would unlock if the Chess* moved
+    }
+
+    PositionVector ChessBoardMoves::lineOfSight(globalEnums::chessColor color)//intakes color, returns the squares that are getting watched by the other color(could be moved to by those pieces)
+    {
+        list<Chess*> piecesOfColor;
         list<string> coveredSquares;
-        if(color == "White")
+        if(color == globalEnums::White)
         {
             piecesOfColor = blackPieces;
         }
@@ -1792,10 +1780,10 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
             piecesOfColor = whitePieces;
         }
         
-        list<Chess> tempPiecesOfColor = piecesOfColor;
+        list<Chess*> tempPiecesOfColor = piecesOfColor;
         for(int counter = 0; counter < piecesOfColor.size(); counter++)
         {
-            Chess piece = tempPiecesOfColor.front();
+            Chess* piece = tempPiecesOfColor.front();
             tempPiecesOfColor.pop_front();
             list<string> moves = FindMoves(piece);
             for(int num = 0; num < moves.size(); num++)
@@ -1809,17 +1797,19 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return coveredSquares;
     }
 
-    bool SameFile(string move, string file)
+    bool ChessBoardMoves::SameFile(string move, string file)
     {
         return (file == move.substr(3, 1));
     }
 
-    bool SameRank(string move, int rank)
+    bool ChessBoardMoves::SameRank(string move, int rank)
     {
         return (rank == stoi(move.substr(4, 1)));
     }
 
-    list<string> movesOutOfCheck(string color, list<string> possibleMoves)
+    /*
+    * need to go back and check on how we are going to find the moves: should not need this convoluted and lengthy check
+    list<string> ChessBoardMoves::movesOutOfCheck(string color, list<string> possibleMoves)
     {
         list<Chess> piecesOfColor;
         list<Chess> piecesOfOtherColor;
@@ -2279,8 +2269,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
         return possibleMoves;
     }
+    */
 
-	void LegalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
+	void ChessBoardMoves::LegalMove(Chess piece, string newPosition)//Make sure move isn't out of bounds or creating a check
 	{
 		globalEnums::chessType type = piece.GetType();
 		list<string> possibleMoves;
@@ -2306,37 +2297,39 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
 	}
 
-	list<string> FindMoves(Chess piece)
+	MoveVector ChessBoardMoves::FindMoves(Chess* piece)
 	{
-		list<string> possibleMoves;
-		globalEnums::chessType type = piece.GetType();
-
-		if(type == "King")
+		MoveVector possibleMoves(piece->GetColor());
+		globalEnums::chessType type = piece->GetType();
+        
+        //we are fixing the line of sight function first to help the CheckMoves functions
+        //after that, we are fixing the CheckMoves functions in order that they are written here
+		if(type == globalEnums::King)
 		{
 			possibleMoves = checkKingMoves(piece);
 			
 		}
-		else if(type == "Queen")
+		else if(type == globalEnums::Queen)
 		{
 			possibleMoves = checkQueenMoves(piece);
 
 		}
-		else if(type == "Bishop")
+		else if(type == globalEnums::Bishop)
 		{
 			possibleMoves = checkBishopMoves(piece);
 
 		}
-		else if(type == "Knight")
+		else if(type == globalEnums::Knight)
 		{
 			possibleMoves = checkKnightMoves(piece);
 
 		}
-		else if(type == "Rook")
+		else if(type == globalEnums::Rook)
 		{
 			possibleMoves = checkRookMoves(piece);
 
 		}
-		else if(type == "Pawn")
+		else if(type == globalEnums::Pawn)
 		{
 			possibleMoves = checkPawnMoves(piece);
 
@@ -2344,18 +2337,19 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		else
 		{
 			std::cout<<"Your type of piece is " << type << ", and that is not in the list of chess pieces";
+            return; //don't wanna reutrn anything bad
 		}
 
 		return possibleMoves;
 	}
 
-	list<string> TotalPossibleMoves(string color)
+	list<string> ChessBoardMoves::TotalPossibleMoves(globalEnums::chessColor color)
 	{
-		list<Chess> piecesOfColor;
+		list<Chess*> piecesOfColor;
 		list<string> possibleMoves;
 		
 
-		if(color == "White")
+		if(color == globalEnums::White)
         {
             piecesOfColor = whitePieces;
         }
@@ -2367,10 +2361,10 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         //find possible moves
 
         int length = piecesOfColor.size();
-        list<Chess> chessPieces = piecesOfColor;
+        list<Chess*> chessPieces = piecesOfColor;
 		for(int counter = 0; counter < length; counter++)
 		{
-            Chess piece = chessPieces.front();
+            Chess* piece = chessPieces.front();
             chessPieces.pop_front();
 			list<string> newMoves = FindMoves(piece);
 			possibleMoves.splice(possibleMoves.begin(), newMoves);
@@ -2379,7 +2373,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 		return possibleMoves;
 	}
 
-    list<string> TotalLegalMoves(string color, list<string> possibleMoves)
+    list<string> ChessBoardMoves::TotalLegalMoves(string color, list<string> possibleMoves)
     {
         list<string> moves;
         
@@ -2409,12 +2403,12 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return possibleMoves;
     }
 
-	static int ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
+	static int ChessBoardMoves::ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 		string str = "abcdefgh";
 		return str.find_first_of(letter) + 1;
 	}
 
-    string WhiteMove(Chess king, list<string> blackPossibleMoves)//computer is white and makes a move (takes other color's moves to make sure it's not in check)
+    string ChessBoardMoves::WhiteMove(Chess king, list<string> blackPossibleMoves)//computer is white and makes a move (takes other color's moves to make sure it's not in check)
     {
         cout << "WhiteMove has started" << endl;
         string whiteMove;
@@ -2471,7 +2465,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 
     }
 
-    string BlackMove(Chess king, list<string> whitePossibleMoves)//computer is black and makes a move (takes other color's moves to make sure it's not in check)
+    string ChessBoardMoves::BlackMove(Chess king, list<string> whitePossibleMoves)//computer is black and makes a move (takes other color's moves to make sure it's not in check)
     {
         cout << "BlackMove has started" << endl;
         string blackMove;
@@ -2524,7 +2518,7 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
         return blackMove;
     }
 
-    void NormalPlay()
+    void ChessBoardMoves::NormalPlay()
     {
         bool checkmate = false;
         int whitePieceCounter = 0;

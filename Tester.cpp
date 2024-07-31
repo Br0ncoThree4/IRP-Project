@@ -23,10 +23,10 @@ class Tester : public ChessBoardMoves
         
         Chess obj = Chess();
         std::cout << "1" << std::endl;
-        list<Chess> pieceList = obj.Setup();
+        std::list<Chess*> pieceList = obj.Setup();
         std::cout << "2" << std::endl;
         ChessBoardMoves board;
-        board = ChessBoardMoves(pieceList);//sets up board w starting pieces
+        board = ChessBoardMoves(pieceList); //sets up board w starting pieces
         board.NormalPlay();
         
         
