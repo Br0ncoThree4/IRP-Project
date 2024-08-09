@@ -9,12 +9,8 @@ using namespace std;
 class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 {
     private:
-        Chess* board[8][8];
-        bool whiteKingInCheck;
-        bool blackKingInCheck;
+        ChessBoard board;
 		string alphabet = "abcdefgh";
-        list<Chess*> blackPieces;
-        list<Chess*> whitePieces;
         list<Chess*> blankSquares;
         bool MoveWentThrough;
         MoveVector possibleWhiteMoves;

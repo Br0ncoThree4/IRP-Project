@@ -172,6 +172,14 @@ class Chess
 	Position* Chess::GetPosition() {
 		return _pos;
 	}
+	PositionVector& Chess::GetPrimaryLOS()
+	{
+		return _primaryLOS;
+	}
+	unordered_map<Position*, Chess*>& Chess::GetSecondaryLOS()
+	{
+		return _secondaryLOS;
+	}
 
 	
 

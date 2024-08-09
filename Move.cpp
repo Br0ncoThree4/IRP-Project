@@ -14,39 +14,42 @@ class Move
 	bool deliversCheck;
 	bool deliversMate;
     bool takes;
+    bool VALIDMOVE_;
+
 	/*
 	* This constructor is only being used internally and therefore does not check if the move is legal or not
 	* this constructor makes the Move object that will be added to the list in the MoveList struct in order to create the list of possible moves that one side has
 	* This constructor will create the Move (that is known to be valid because of a previous check), which will then be added to a MoveList object, which will be passed to a later Play function and check for the player's move in that list
 	*/
-	Move::Move(Chess* piece, std::string move)
-	: piece_(piece), oldPos_(piece->GetPosition()), newPos_()
+	Move::Move(Chess*** board, Chess* piece, std::string move)
+	: piece_(piece), oldPos_(piece->GetPosition()), newPos_(), VALIDMOVE_(true)
 	{
+        std::string tempMove = move;
 		//this stuff is pretty simple: could be changed in the future to include the check to ensure the move is valid before accepting it
         //takes out the extra chars besides move-specific information and updates the bool info
         if(piece->GetType() != globalEnums::Pawn) //not a pawn move (e.g. Nf3)
         {
-            move = move.substr(1); //remove the piece type from the move (e.g. f3)
+            tempMove = tempMove.substr(1); //remove the piece type from the move (e.g. f3)
         }
         //else: pawn move means that there is no piece type in the move, and therefore should be skipped
-        if(move.find("x") != -1) //e.g. Nfxd5 -> fxd5
+        if(tempMove.find("x") != -1) //e.g. Nfxd5 -> fxd5
         {
             takes = true;
-            move = move.substr(0, move.find("x")) + move.substr(move.find("x") + 1); //adds the part before takes to the part after takes: shouldn't run an error because of the 0 length substr if there is no pieceIdentifier, but NOTE that could be an issue
+            tempMove = tempMove.substr(0, tempMove.find("x")) + tempMove.substr(tempMove.find("x") + 1); //adds the part before takes to the part after takes: shouldn't run an error because of the 0 length substr if there is no pieceIdentifier, but NOTE that could be an issue
                 //e.g. fxd5 -> fd5
         }
-		if(move.find("#") != -1)
+		if(tempMove.find("#") != -1)
 		{
 			deliversMate = true;
-            move = move.substr(0, move.length() - 1); //removes the last letter
+            tempMove = tempMove.substr(0, tempMove.length() - 1); //removes the last letter
 		}
 		else
 		{
 			deliversMate = false;
-			if(move.find("+") != -1)
+			if(tempMove.find("+") != -1)
 			{
 				deliversCheck = true;
-                move = move.substr(0, move.length() - 1); //removes the last letter
+                tempMove = tempMove.substr(0, tempMove.length() - 1); //removes the last letter
 			}
 			else
 			{
@@ -57,26 +60,45 @@ class Move
 		delete newPos_; //must be set using the move, so the default Position that is created before the constructor starts must be destroyed (can't get around that, must be created and then deleted)
 
         std::string newPosString;
-        newPosString = move.substr(move.length() - 2, 2);
-        if(move.length() != 2) {
-            pieceIdentifier = move.substr(0, move.length() - 2); // e.g. exd5 -> ed5: pieceIdentifier = "e", newPosString = "d5", takes = true
+        newPosString = tempMove.substr(tempMove.length() - 2, 2);
+        if(tempMove.length() != 2) {
+            pieceIdentifier = tempMove.substr(0, tempMove.length() - 2); // e.g. exd5 -> ed5: pieceIdentifier = "e", newPosString = "d5", takes = true
         }
-            //NOTE: Position is created here, so all of these positions must be destroyed after they are done being used
-        newPos_ = new Position(move[0], move[1] - '0');
+            //NOTE: Position is created here, so all of these positions must be destroyed after they are done being used - done in Move destructor
+        newPos_ = new Position(tempMove[0], tempMove[1] - '0');
+
+            //check to make sure that the move is valid: done after the Move has been created because we want the extra info to help us with the function
+        if(this->checkMove(board, piece, move) == false) 
+        {
+            VALIDMOVE_ = false;
+            delete piece_; piece_ = NULL; 
+            delete oldPos_; oldPos_ = NULL;
+            delete newPos_; newPos_ = NULL;
+            std::cout << "This Move " << move << " is not valid" << endl;
+            std::cout << "tempMove value: " << tempMove << endl;
+            std::cout << "takes, deliversCheck, and deliversMate values:: " << takes << ", " << deliversCheck << ", " << deliversMate << endl;
+        }
 	}
 
     /*
     * this function will check if the move string is legal
-    * this function needs access to the board in order to check if the piece is in the position it wants to be and 
+    * this function needs access to the board in order to check if the piece is in the position it wants to be, access to the board to make sure the piece is in the right position and 
     */
-    static void Move::checkMove(Chess** board[8], std::string m)
+    bool Move::checkMove(Chess** board[8], Chess* piece, std::string move)
     {
+            //check if the piece pointer and the pointer at the piece's position are not the same: false move (i.e. the piece thinks it's somewhere that the board thinks it is not)
+        if(piece != board[piece->GetPosition()->file - 'a'][piece->GetPosition()->rank]) {return false;} //NOTE: this board check should work, getting the index with Position.file (-char-) - 'a' and Position.file
+            //check if the piece's Line Of Sight has the new position in it
+        if(piece->GetPrimaryLOS().PositionInVector(newPos_) == false) {return false;}
 
+            //If we get here: the piece could move to this spot: now we need to check if the piece is able to
+        //need to check if the piece is pinned
+        
     }
 
 
     /*
-    * Destructor must be created so that there is not a memory leak from these memory locations being kept and possibly used after this is done
+    * Destructor must be created so that there is not a memory leak from these memory locations being kept and possibly used with the Move
     */
     Move::~Move()
     {

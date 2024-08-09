@@ -16,13 +16,8 @@ using namespace std;
 class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
 {
     private:
-        Chess* board[8][8];
-        bool whiteKingInCheck;
-        bool blackKingInCheck;
+        ChessBoard board;
 		string alphabet = "abcdefgh";
-        list<Chess*> blackPieces;
-        list<Chess*> whitePieces;
-        list<Chess*> blankSquares;
         bool MoveWentThrough;
         MoveVector possibleWhiteMoves;
         MoveVector possibleBlackMoves;
@@ -153,9 +148,9 @@ class ChessBoardMoves//doesn't need to be child class of Chess bc it inherits it
     bool SameRank(string move, int rank);
     list<string> movesOutOfCheck(string color, list<string> possibleMoves);
 	void LegalMove(Chess* piece, string newPosition); //Make sure move isn't out of bounds or creating a check
-	list<string> FindMoves(Chess* piece);
-	list<string> TotalPossibleMoves(string color);
-	static int ChangeLetterToNumber(string letter); //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
+	// list<string> FindMoves(Chess* piece);
+	// list<string> TotalPossibleMoves(string color);
+	// static int ChangeLetterToNumber(string letter); //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 
     string WhiteMove(Chess king, list<string> blackPossibleMoves); //computer is white and makes a move (takes other color's moves to make sure it's not in check)
     string BlackMove(Chess king, list<string> whitePossibleMoves); //computer is black and makes a move (takes other color's moves to make sure it's not in check)

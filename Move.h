@@ -17,7 +17,7 @@ class Move
     Move::Move(Chess* piece, Position* newPos_, bool takes, bool checks, bool mates);
     Move::~Move();
 
-    static void Move::checkMove(std::string m);
+    bool Move::checkMove(std::string m);
 };
 
 class MoveVector
