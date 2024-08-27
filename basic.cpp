@@ -35,32 +35,41 @@ class PositionVector
         /*
         * This function will either return true if the Position* is in vecPos_ or false if the Position* is not (could)
         */
-    Position* PositionVector::getPosition(Position*& p)
+    Position* PositionVector::getPosition(int index)
     {
-        std::vector<Position*>::iterator posIt;
-        posIt = std::find(vecPos_.begin(), vecPos_.end(), p);
-        if(posIt == vecPos_.end()) {return NULL;}
-        //else
-        int index = posIt - vecPos_.begin();
+        if(index == -1) {return NULL;}
+        if(index > vecPos_.size()) {std::cout << "The index inputted is " << index << ", and the size of vecPos_ is " << vecPos_.size() << endl; return NULL;}
         return vecPos_[index];
     }
 
         /*
-        * This function will simply return true or false for whether the Position* is in the vector
-        * * * * NOTE: this should be simpler to do - look into vector functions for bool IsInVector function to be used here, since we find the index just to not use it at all
+        * This function will return the vector for that Position*'s index in the vector, or -1 if the Position* is not in the vector
         */
-    bool PositionInVector(Position*& p)
+    int PositionInVector(Position*& p)
     {
         std::vector<Position*>::iterator posIt; //creates an iterator: will be used to find the index of the position and therefore if it is in the list
         posIt = std::find(vecPos_.begin(), vecPos_.end(), p);
-        if(posIt == vecPos_.end()) {return false;} //Position* p is not in the vector
+        if(posIt == vecPos_.end()) {return -1;} //Position* p is not in the vector
         //if it gets here, the Position* is in the vector
-        return true; //Position* p is in the vector
+        return (posIt - vecPos_.begin()); //Position* p is in the vector
     }
         //push_back methods
-    void push_back(Position*& p);
-    void push_back(Chess* piece);
-    void clear();
+    void push_back(Position* p) 
+    {
+        if(*(p)) //uses Position.bool() to make sure that the piece is on the board
+        {vecPos_.push_back(p);} 
+    }
+    /*
+    * Might have to be scrapped bc of the functionality: this would basically just use the previously created push_back in a slightly fancier way5
+    */
+    // void push_back(Chess* piece)
+    // {
+    //     for(Position*& p : piece->) //For Position that the piece can move to: add to posVec
+    //     {
+    //         this->push_back(p);
+    //     }
+    // }
+    void clear() {vecPos_.clear();}
 };
 
 //globalEnums class does not have to be defined in this file because nothing is being added to it; that class just holds the Enums
@@ -104,10 +113,4 @@ class PositionVector
     /*
     * charToType takes the char representing the type and returns the chessType for that piece
     */
-    std::unordered_map <char, globalEnums::chessType> charToType = {{'N' , globalEnums::Knight}, 
-                                                                    {'B' , globalEnums::Bishop}, 
-                                                                    {'R' , globalEnums::Rook}, 
-                                                                    {'Q' , globalEnums::Queen}, 
-                                                                    {'K' , globalEnums::King}, 
-                                                                    {' ' , globalEnums::Pawn}};
 //};

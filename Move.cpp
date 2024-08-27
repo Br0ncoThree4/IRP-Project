@@ -87,12 +87,21 @@ class Move
     bool Move::checkMove(Chess** board[8], Chess* piece, std::string move)
     {
             //check if the piece pointer and the pointer at the piece's position are not the same: false move (i.e. the piece thinks it's somewhere that the board thinks it is not)
-        if(piece != board[piece->GetPosition()->file - 'a'][piece->GetPosition()->rank]) {return false;} //NOTE: this board check should work, getting the index with Position.file (-char-) - 'a' and Position.file
+        if(piece != board[piece->GetFile() - 'a'][piece->GetRank()]) {return false;} //NOTE: this board check should work, getting the index with Position.file (-char-) - 'a' and Position.file
             //check if the piece's Line Of Sight has the new position in it
         if(piece->GetPrimaryLOS().PositionInVector(newPos_) == false) {return false;}
 
             //If we get here: the piece could move to this spot: now we need to check if the piece is able to
         //need to check if the piece is pinned
+    }
+
+    /*
+    * this function will check if the move string is legal
+    * this function needs access to the board in order to check if the piece is in the position it wants to be and the color to make sure that the correct piece can be identified and checked
+    * We could also do this check in the ChessBoard class, which holds the LOS's and has a little more mobility
+    */
+    static void Move::checkMove(Chess** board[8], std::string m, globalEnums::chessColor color)
+    {
         
     }
 
@@ -128,15 +137,9 @@ class MoveVector
         if(vecIt != vecMove_.end()) {return (vecIt - vecMove_.begin());}
         else {return -1;} 
     }
+    Move& MoveVector::Get(int index) {return vecMove_[index];}
         //push_back methods
-    void MoveVector::push_back(Move& m) {vecMove_.push_back(m);}
-    void MoveVector::push_back(Chess* piece)
-    {
-        for(Move& m : vecMove_)
-        {
-            this->push_back(m);
-        }
-    }
+    void MoveVector::push_back(Move& m) {vecMove_.push_back(m);} //dumb function: doesn't check
     //other changing methods
     void MoveVector::clear() {vecMove_.clear();}
 };

@@ -36,11 +36,10 @@ class PositionVector
         //getter methods
     globalEnums::chessColor GetColor();
     vector<Position*>& GetPositionVector();
-    Position* PositionVector::getPosition(Position*& p);
-    bool PositionInVector(Position*& p);
+    Position* PositionVector::getPosition(int index);
+    int PositionInVector(Position*& p);
         //push_back methods
-    void push_back(Position& p);
-    void push_back(Chess* piece);
+    void push_back(Position* p);
     void clear();
 };
 
@@ -65,4 +64,19 @@ class globalEnums{
         BLANK_TYPE = 0,
         NULL_TYPE = -1
     };
+
+    enum direction
+    {
+        vertical = 0,
+        diagonalURBL = 1,
+        horizontal = 2,
+        diagonalBRUL = 3
+    };
+
+    std::unordered_map <char, globalEnums::chessType> charToType = {{'N' , globalEnums::Knight}, 
+                                                                    {'B' , globalEnums::Bishop}, 
+                                                                    {'R' , globalEnums::Rook}, 
+                                                                    {'Q' , globalEnums::Queen}, 
+                                                                    {'K' , globalEnums::King}, 
+                                                                    {' ' , globalEnums::Pawn}};
 };

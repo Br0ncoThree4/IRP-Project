@@ -7,9 +7,11 @@ using namespace std;
 //#define NULL 0
 //#endif
 
+//board[file][rank] - might want to go back and check on this later/change it so that it's _board[1] being the second rank
+	//Going through and changing everything to board[rank][file], following standard 2d array syntax
 class Chess
 {
-	private:
+	protected:
 		globalEnums::chessColor _color;
 		globalEnums::chessType _type;
 		Position* _pos;
@@ -145,7 +147,6 @@ class Chess
 				std::cout << "Position check is " << *(_pos) << endl; //pretty sure this inclusion of the Position will return a bool
 			}
 		}
-	
 		//Taken out on 7/19 because of moveToType and no other reason to require this function
 	// static int Chess::ChangeLetterToNumber(string letter) { //Method that changes letter into a number (used for the file to be chnaged from a letter to a number)
 	// 	string str = "abcdefgh";
@@ -180,6 +181,11 @@ class Chess
 	{
 		return _secondaryLOS;
 	}
+	globalEnums::chessColor Chess::GetConstColor() const {return _color;}
+	globalEnums::chessType Chess::GetConstType() const {return _type;}
+	char Chess::GetConstFile() const {return _pos->file;}
+	int Chess::GetConstRank() const {return _pos->rank;}
+	Position* Chess::GetConstPosition() const {return _pos;}
 
 	
 
@@ -188,12 +194,14 @@ class Chess
 	* doesn't check whether or not the move can be made
 	* Changes the board
 	*/
-	void Chess::SetPosition(Chess** board[8], Position* newPosition) {
-		board[newPosition->file][newPosition->rank] = this; //update the board with the move
-		delete board[_pos->file][_pos->rank]; //delete the pointer to this in the old position on the board
-		board[_pos->file][_pos->rank] = new Chess(globalEnums::BLANK_COLOR, globalEnums::BLANK_TYPE, _pos->file, _pos->rank); //update the old position with its new state (blank)
+	/* Function Chess::SetPosition got changed on 8/22 because the ChessSquare and ChessBoar classes can handle moving the piece in a more streamlined manner
+	void Chess::SetPosition(ChessSquare** boar, Position* newPosition) {
+		boar[newPosition->rank][newPosition->file] = this; //update the boar with the move
+		delete boar[_pos->rank][_pos->file]; //delete the pointer to this in the old position on the boar
+		boar[_pos->rank][_pos->file] = new Chess(globalEnums::BLANK_COLOR, globalEnums::BLANK_TYPE, _pos->file, _pos->rank); //update the old position with its new state (blank)
 		_pos = newPosition; //update the variable inside the Chess piece for its location
 	}
+		*/
 
 	//Creating basic board
 	static list<Chess*> Chess::Setup()
@@ -291,8 +299,221 @@ class Chess
 		}
 	}
 	 */
+
+	friend std::ostream& operator<<(ostream& os, Chess* piece)
+	{
+		piece->PrintOut(os);
+		return os;
+	}
+
+	virtual void Chess::PrintOut(ostream& os)
+	{
+		os << GetColor() << " " << GetType() << ", " << GetPosition()->file << GetPosition()->rank << endl;
+	}
+
 	~Chess()
 	{
 		delete _pos;
+	}
+};
+
+class ChessSquare
+{
+    private:
+    Position pos_;
+    Chess* piece_; //will be NULL if not occupied, point to smth if it is - therefore we don't need a bool for occupied, just check if it's NULL
+
+    public:
+        //constructors
+    ChessSquare::ChessSquare() : piece_(NULL), pos_('z', -1) {} //default constructor
+    ChessSquare::ChessSquare(string s) //string s in form "e4" - can't do it before the constructor because we're creating pointers
+    {
+        piece_ = new Chess(s);
+        pos_ = *(piece_->GetPosition());
+        if(piece_->GetColor() == globalEnums::BLANK_COLOR) //if the square is blank
+            delete piece_;
+    }
+    ChessSquare::ChessSquare(const ChessSquare& s) : pos_(s.pos_), piece_(s.piece_) {} //copy constructor
+    ChessSquare::ChessSquare(Chess* piece) : pos_(*(piece->GetPosition())), piece_(piece) {} //constrtor to be used for custom positions - piece gets created and then added to the square, regardless of where that piece "should" be based off the typical setup of the board
+    ChessSquare::~ChessSquare() {delete piece_;} //destructor: delete all pointers for no memory leak
+        //getter methods
+    Position ChessSquare::GetPos() {return pos_;}
+    Chess* ChessSquare::GetPiece() {return piece_;}
+    ChessSquare::operator bool() {return piece_ != NULL;} //Returns true if the Square has a piece on it (points to a non-NULL object), and false if it does not (points to NULL)
+        //action methods
+    void ChessSquare::ChangePiece(Chess* newPiece) //NOTE: doesn't take the piece out of a piece list if that happens
+    {
+        if(piece_ == newPiece) {cout << "You just tried to move a piece from where it is to where it is" << endl; return;} //don't want the program to do extra work or delete the pointer if the piece is somehow repeated
+        delete piece_; 
+        piece_ = newPiece;
+    } 
+};
+
+class ChessRank
+{
+	private: 
+	ChessSquare rank_[8];
+	int rankNumber_; //number from 1 to 8
+
+	public:
+	ChessRank::ChessRank() : rankNumber_(-1)
+	{
+		//ChessSquares get created using the default constructor
+	}
+	ChessRank::ChessRank(int rn) : rankNumber_(rn)
+	{
+		//ChessSquares get created using the default constructor
+	}
+	//changing methods
+	void ChessRank::ChangePiece(Chess* piece)
+	{
+		if(piece->GetRank() != rankNumber_) {cout << "A piece tried to get added on a rank that it is not on" << endl; return;} //check to make sure the rank is correct
+		rank_[piece->GetFile() - 'a'].ChangePiece(piece); //change the ChessSquare to have the piece on it
+	}
+	ChessSquare& ChessRank::operator[](int index)
+	{
+		if(1 <= index && index <= 8) {return rank_[index-1];}
+		cout << "You gave me a bad index of " << index << ", which is not within the range of 1-8;; Returning first piece at position [" << rankNumber_ << "][0]:" << endl;
+		return rank_[0];
+	}
+	
+};
+
+class ChessList
+{
+	private:
+	std::list<Chess*> chessList_;
+
+	public:
+		//constructor
+	ChessList::ChessList() {}
+		//getter method
+	list<Chess*> ChessList::GetChessList() {return chessList_;}
+		//action method
+	void addChessPiece(Chess* piece) {chessList_.push_back(piece);}
+};
+
+class LineOfSight
+{
+    globalEnums::chessColor color_;
+    std::unordered_map<ChessSquare&, ChessList&> primaryLOS_; //for a given chess square, it will return the piece(s) that can see it (not necessarily move there, just see)
+        //secondaryLOS really only has to worry about the king, as the primaryLOS worries about what can see the king right now
+        //however, we can change the pieces to have pinned directional checks so that with each piece, you only have to check moves when they are not pinned 
+    public:
+        //constructors
+    LineOfSight::LineOfSight() : color_(globalEnums::NULL_COLOR), primaryLOS_(0) {} //primaryLOS_(0) should be able to initialize the unordered_map as an empty map
+    LineOfSight::LineOfSight(globalEnums::chessColor color) : color_(color), primaryLOS_(0) {}
+        //getter methods
+    globalEnums::chessColor LineOfSight::GetColor() {return color_;}
+    unordered_map<ChessSquare&, ChessList&> LineOfSight::GetLineOfSight() {return primaryLOS_;}
+};
+
+class ChessBoard
+{
+	protected:
+	ChessRank _board[8]; //the chess board: 2D array of Chess Squares that have a Position and a pointer to a Chess piece if that piece exists or NULL if it does not
+	bool whiteKingInCheck;
+    bool blackKingInCheck;
+	list<Chess*> blackPieces;
+    list<Chess*> whitePieces;
+	PositionVector _whitePrimaryLOS; //the positions that white pieces can see/move to
+	PositionVector _blackPrimaryLOS; //the positions that white pieces can see/move to
+	unordered_map<Position*, Chess*> _whiteSecondaryLOS; //the positions that could be seen/moved to if the Chess* moves
+	unordered_map<Position*, Chess*> _blackSecondaryLOS; //the positions that could be seen/moved to if the Chess* moves
+		//these LOS's will be changed when it comes time to look at what moves are legal
+
+	public:
+		//constructors
+	ChessBoard::ChessBoard() : whiteKingInCheck(false), blackKingInCheck(false)
+	{
+		for(int rank = 1; rank <= 8; rank++)
+		{
+			_board[rank - 1] = ChessRank(rank);
+			for(char file = 'a'; file <= 'h'; file++)
+			{
+				_board[rank - 1][file - 'a'] = ChessSquare("" + file + rank);
+				if(_board[rank - 1][file - 'a']) //if there is actually a piece on this square
+				{
+					//NOTE: we could also try and add moves at this time, but we would have to make sure that it accounts for the fact that more pieces are getting added
+					if(_board[rank - 1][file - 'a'].GetPiece()->GetColor() == globalEnums::White)
+					{
+						whitePieces.push_back(_board[rank - 1][file - 'a'].GetPiece());
+					}
+					else
+					{
+						blackPieces.push_back(_board[rank - 1][file - 'a'].GetPiece());
+					}
+				}
+				cout << endl;
+			}
+		}
+	}
+		//NEED TO FINISH - find the piece's positions and add them to those squares; leave the other squares empty
+	ChessBoard::ChessBoard(list<Chess*> pieceList) 
+	{
+		for(int rank = 1; rank <= 8; rank++)
+		{
+			_board[rank - 1] = ChessRank(rank); //creates all blank ranks
+		}
+		for(Chess* piecePointer : pieceList)
+		{
+			_board[piecePointer->GetRank() - 1].ChangePiece(piecePointer); // adds each chessPiece to the board, making the ChessSquare piece pointers not null if the piece is on that square and the rest of the squares staying NULL
+			if(piecePointer->GetColor() == globalEnums::White)
+			{
+				whitePieces.push_back(piecePointer);
+			}
+			else if(piecePointer->GetColor() == globalEnums::Black)
+			{
+				blackPieces.push_back(piecePointer);
+			}
+			else
+			{
+				cout << "Piece had a color of " << piecePointer->GetColor() << ", which is not either globalEnums::White or globalEnums::Black" << endl;
+			}
+		}
+	}
+		//destructor
+	ChessBoard::~ChessBoard()
+	{
+		delete [] _board; //should only need this to delete the array, as it is an array of pointers and the 'delete []' function deletes the array of pointers
+		while(blackPieces.size() > 0)
+		{
+			blackPieces.pop_front(); //NOTE: Could be something that could causes a memory leak for not deleting the Chess
+		}
+		while(whitePieces.size() > 0)
+		{
+			whitePieces.pop_front(); //NOTE: Could be something that causes a memory leak for not deleting the Chess pointers
+		}
+	}
+		//getter methods
+	ChessSquare** ChessBoard::GetBoard() {return _board;} //returns the board
+	PositionVector& ChessBoard::GetWhitePLOS() {return _whitePrimaryLOS;} 
+	PositionVector& ChessBoard::GetBlackPLOS() {return _blackPrimaryLOS;} 
+	unordered_map<Position*, Chess*>& ChessBoard::GetWhiteSLOS() {return _whiteSecondaryLOS;} 
+	unordered_map<Position*, Chess*>& ChessBoard::GetBlackSLOS() {return _blackSecondaryLOS;} 
+		//other useful methods
+	bool ChessBoard::IsSquareBlank(ChessSquare& cs) {return cs;} //returns true if the square is blank and returns false if the square is not blank
+	void ChessBoard::AddPiece(Chess* piece) 
+	{
+		if(piece->GetColor() == globalEnums::White)
+		{
+			whitePieces.push_back(piece);
+		}
+		else if(piece->GetColor() == globalEnums::Black)
+		{
+			blackPieces.push_back(piece);
+		}
+	}
+
+	ChessRank& ChessBoard::operator[](int index)
+	{
+		if(1 <= index && index <= 8) {return _board[index-1];}
+		cout << "You gave me a bad index of " << index << ", which is not within the range of 1-8;; Returning first rank:" << endl;
+		return _board[0];
+	}
+
+	ChessRank& ChessBoard::Get(Position& pos)
+	{
+
 	}
 };
